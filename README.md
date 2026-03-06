@@ -54,6 +54,12 @@ pnpm run build
 
 Then run `deck start` from the install directory, or add it to PATH as the install script does.
 
+## Required prompt in OpenClaw
+
+In your OpenClaw chat, add this prompt once so the assistant loads and follows the tracker:
+
+- **English:** Read AGENTS.MD and skill-tracker/SKILL.MD, and follow them strictly.
+
 ## Highlights
 
 - **Skills** — Browse and inspect OpenClaw workspace skills (SKILL.md, metadata).

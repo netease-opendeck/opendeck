@@ -54,6 +54,12 @@ pnpm run build
 
 然后从安装目录执行 `deck start`，或按安装脚本提示将安装目录加入 PATH。
 
+## OpenClaw 中需手动添加的提示词
+
+在 OpenClaw 对话中请至少添加一次以下提示词，以便助手加载并遵守 tracker 规范：
+
+- **中文：** 读取 AGENTS.MD 和 skill-tracker/SKILL.MD，严格遵守执行。
+
 ## 功能概览
 
 - **技能** — 浏览与查看 OpenClaw 工作区中的技能（SKILL.md、元数据）。
