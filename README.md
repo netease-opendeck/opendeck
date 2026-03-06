@@ -14,7 +14,7 @@ It helps users clearly observe the Agent execution process and manage AI-generat
 ## Why OpenDeck?
 When running tasks with OpenClaw, users often encounter several practical challenges.
 
-1. Too many tasks make it easy to lose context
+1. Too many tasks make human brain easy to lose context
 
   When multiple tasks are executed consecutively, or when a single task runs for a long time, users often forget:
   - What tasks they previously asked OpenClaw to execute
