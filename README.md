@@ -1,54 +1,108 @@
 [English](README.md) | [中文](docs/README.zh-CN.md)
 
-# DECK — Assistant Management UI for OpenClaw
+# OpenDeck — Assistant Management UI for OpenClaw
 
 [![version](https://img.shields.io/badge/version-1.0.0-blue)](https://github.com/openclaw/open-deck)
 [![openclaw](https://img.shields.io/badge/openclaw-ready-brightgreen)](https://github.com/openclaw/openclaw)
 [![opendeck](https://img.shields.io/badge/opendeck-manage-orange)](https://github.com/openclaw/open-deck)
-[![manage](https://img.shields.io/badge/manage-dashboard-9cf)](https://github.com/openclaw/open-deck)
 
-**DECK** is a web UI for managing your [OpenClaw](https://github.com/openclaw/openclaw) assistant. It lets you browse skills, inspect files from skill execution records, and view task history—all from one place.
-
-If you run OpenClaw and want a local dashboard for skills, files, and tasks, DECK is for you.
+**OpenDeck** is a lightweight AI workspace dashboard designed to visually manage OpenClaw tasks, files, and skills.
+It helps users clearly observe the Agent execution process and manage AI-generated tasks and artifacts more efficiently.
 
 [Documentation](docs/en/installation.md) · [Installation](docs/en/installation.md) · [Contributing](CONTRIBUTING.md)
 
-## Prerequisites
+## Why OpenDeck?
+When running tasks with OpenClaw, users often encounter several practical challenges.
 
+1. Too many tasks make it easy to lose context
+
+  When multiple tasks are executed consecutively, or when a single task runs for a long time, users often forget:
+  - What tasks they previously asked OpenClaw to execute
+  - What the current task is supposed to do
+  - Why OpenClaw is asking for additional information
+  - By the time OpenClaw finishes a task or requests new input, the user may have already forgotten the original task context.
+
+
+2. Too many generated files make them difficult to find and associate
+
+Many AI workflows generate a large number of output artifacts, such as generated documents and uploaded reference materials.Although the file paths themselves may be clear, once the number of files increases, quickly locating and retrieving them becomes difficult
+
+3. Users want to understand what steps a task actually executed and why it consumed so many tokens
+
+OpenClaw does not present all the execution steps of a task within the conversation, making it hard for users to inspect the process and therefore difficult to optimize the task.
+
+For these reasons, we built OpenDeck.
+OpenDeck introduces a visual dashboard that consolidates tasks, generated files, and skills from OpenClaw into a unified interface.
+Information that was previously scattered across logs and local directories becomes clear, structured, and easy to explore.
+
+## Core Features
+OpenDeck provides three core modules to help users better understand and manage the OpenClaw execution workflow.
+
+### Tasks
+The Tasks module visualizes OpenClaw’s task execution so users can clearly see what the Agent is currently doing.
+In the task list, users can view:
+- Current task list
+- Task execution status
+- Creation time
+- Detailed task information
+With the task dashboard, users can quickly understand the Agent’s workload and overall execution state.
+
+![Tasks](assets/tasks.png)
+
+### Files
+The Files module centralizes all files generated during OpenClaw task execution.
+As tasks increase, generated files tend to become scattered across multiple local directories, making them hard to track.
+OpenDeck automatically collects these files and displays them in a unified interface.
+Users can:
+View the file list
+Quickly preview files
+Download generated files
+OpenDeck also establishes task-to-file relationships, allowing users to quickly locate which files were produced by a specific task.
+
+![Files](assets/files.png)
+
+### Skills
+The Skills module displays the skills used within OpenClaw, helping users understand the capabilities available to the Agent.
+Users can view:
+The list of available skills
+Basic skill information
+Skill usage details
+Through this module, users can better understand the capability structure of their Agent and gradually accumulate reusable skills.
+
+![Skills](assets/skills.png)
+
+## Final Thoughts
+By organizing tasks, files, and skills into a unified dashboard, OpenDeck turns OpenClaw from a black box into a transparent system.
+It helps users:
+Understand the Agent’s execution process more intuitively
+Manage AI-generated results more efficiently
+
+
+AI prefers CLI.
+But humans — the bosses of AI — still prefer GUI. 
+And bosses need a dashboard.
+
+
+**Note:**
+> OpenDeck can only display tasks created after installation and their associated files. Tasks executed and files generated before installation will not be shown.
+
+## Quick Start
+
+### prerequisites
 - [OpenClaw](https://docs.openclaw.ai/) installed and configured
-- Node.js ≥18, and pnpm or npm (curl for one-line install on Linux/macOS)
+- Node.js ≥18, and pnpm or npm (Linux/macOS one-line install requires curl)
 
-## Install (recommended)
+### plan A
 
-One-line install (replace `YOUR_ORG` with your GitHub org or username):
+You can send the following prompt to your OpenClaw to automatically install and start OpenDeck.
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_ORG/open-deck/main/scripts/install.sh | bash
-```
+Visit https://github.com/netease-opendeck/opendeck to download and install OpenDeck, then start the service
 
-Or with a specific release tarball:
+### plan B
 
 ```bash
-DECK_RELEASE_URL=https://github.com/YOUR_ORG/open-deck/releases/latest/download/deck.tar.gz curl -fsSL https://raw.githubusercontent.com/YOUR_ORG/open-deck/main/scripts/install.sh | bash
-```
-
-## Quick start
-
-After install, the `deck` command is on your PATH:
-
-```bash
-deck start
-```
-
-- **App (frontend + API):** http://localhost:19520  
-
-Use `deck stop`, `deck restart`, `deck status`, and `deck help` as needed.
-
-## From source
-
-```bash
-git clone https://github.com/YOUR_ORG/open-deck.git
-cd open-deck
+git clone https://github.com/netease-opendeck/opendeck.git
+cd opendeck
 
 ./scripts/install.sh --from-local
 ```
@@ -64,16 +118,10 @@ In your OpenClaw chat, add this prompt once so the assistant loads and follows t
 
 ## Recommended language models
 
-DECK works with any model that your OpenClaw setup supports, but for better task tracking quality and response consistency we currently **recommend**:
+OpenDeck works with any model that your OpenClaw setup supports, but for better task tracking quality and response consistency we currently **recommend**:
 
 - **Opus 4.6** (high reasoning capability, good for complex multi-step tasks)
 - **GLM-5** (strong general-purpose model with good Chinese support)
-
-## Highlights
-
-- **Skills** — Browse and inspect OpenClaw workspace skills (SKILL.md, metadata).
-- **File management** — Browse files from skill execution records with search, filters, and preview.
-- **Task history** — View past skill executions with time filters and grouping.
 
 ## How it works
 
@@ -82,12 +130,12 @@ OpenClaw (workspace/skills, workspace/tracker-result/skill-execution.jsonl)
                     │
                     ▼
 ┌─────────────────────────────────────┐
-│           DECK Backend              │
+│           OpenDeck Backend          │
 │   (NestJS, serves frontend, 19520)  │
 └─────────────────────────────────────┘
 ```
 
-DECK reads from your OpenClaw root: skills from `workspace/skills` and execution data from `workspace/tracker-result/skill-execution.jsonl`. No database—file-based.
+OpenDeck reads from your OpenClaw root: skills from `workspace/skills` and execution data from `workspace/tracker-result/skill-execution.jsonl`. No database—file-based.
 
 ## Configuration
 
