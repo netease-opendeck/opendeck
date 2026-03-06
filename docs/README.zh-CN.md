@@ -50,13 +50,11 @@ deck start
 git clone https://github.com/YOUR_ORG/open-deck.git
 cd open-deck
 
-pnpm install
-pnpm run build
-
 ./scripts/install.sh --from-local
 ```
 
 然后从安装目录执行 `deck start`，或按安装脚本提示将安装目录加入 PATH。
+首次执行 `deck start` 时，会在安装目录下自动安装依赖并构建前端与后端（首次启动时间会稍长）。
 
 ## OpenClaw 中需手动添加的提示词
 

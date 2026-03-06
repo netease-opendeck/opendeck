@@ -62,9 +62,7 @@ function normalizeTaskError(error: unknown): TaskHistoryApiError {
   };
 }
 
-const API_BASE_URL = import.meta.env.DEV
-  ? '/api'
-  : import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.DEV ? '/api' : import.meta.env.VITE_API_BASE_URL ?? '/api';
 
 const http = axios.create({
   baseURL: API_BASE_URL,

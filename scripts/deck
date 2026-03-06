@@ -84,13 +84,22 @@ ensure_pm2() {
 }
 
 ensure_build() {
-  if [ ! -f "$DECK_ROOT/backend/dist/main.js" ]; then
-    echo "正在构建 backend..."
+  # backend: lazy install + build
+  if [ ! -d "$DECK_ROOT/backend/node_modules" ]; then
+    echo "正在为 backend 安装依赖并构建..."
     (cd "$DECK_ROOT/backend" && $PKG install && $PKG run build)
+  elif [ ! -f "$DECK_ROOT/backend/dist/main.js" ]; then
+    echo "backend 依赖已安装，仅构建 dist..."
+    (cd "$DECK_ROOT/backend" && $PKG run build)
   fi
-  if [ ! -d "$DECK_ROOT/app/dist" ]; then
-    echo "正在构建 frontend..."
+
+  # frontend: lazy install + build
+  if [ ! -d "$DECK_ROOT/app/node_modules" ]; then
+    echo "正在为 frontend 安装依赖并构建..."
     (cd "$DECK_ROOT/app" && $PKG install && $PKG run build)
+  elif [ ! -d "$DECK_ROOT/app/dist" ]; then
+    echo "frontend 依赖已安装，仅构建 dist..."
+    (cd "$DECK_ROOT/app" && $PKG run build)
   fi
 }
 

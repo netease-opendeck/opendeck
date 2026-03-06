@@ -50,13 +50,11 @@ Use `deck stop`, `deck restart`, `deck status`, and `deck help` as needed.
 git clone https://github.com/YOUR_ORG/open-deck.git
 cd open-deck
 
-pnpm install
-pnpm run build
-
 ./scripts/install.sh --from-local
 ```
 
 Then run `deck start` from the install directory, or add it to PATH as the install script does.
+On first start, `deck` will automatically install dependencies and build the backend and frontend in the install directory (this may take a while).
 
 ## Required prompt in OpenClaw
 

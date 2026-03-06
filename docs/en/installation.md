@@ -30,6 +30,8 @@ cd open-deck
 ./scripts/install.sh --from-local
 ```
 
+On first `deck start`, DECK will automatically install dependencies and build both backend and frontend inside the install directory. This may take some time depending on your network and machine.
+
 ### Install options
 
 | Option | Description |
