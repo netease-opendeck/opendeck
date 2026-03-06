@@ -300,7 +300,7 @@ export default defineComponent({
                     selectedFile.value = file;
                   }}
                   class="w-full flex items-center gap-3 py-3 text-left hover:bg-slate-50/80 transition-colors"
-                  style={{ paddingLeft: `${paddingLeft}px`, paddingRight: 32 }}
+                  style={{ paddingLeft: `${paddingLeft}px`, paddingRight: 56 }}
                 >
                   <div class="flex-shrink-0 p-2 rounded-lg bg-white border border-slate-100 text-slate-500">
                     {(() => {
@@ -505,8 +505,7 @@ export default defineComponent({
                       <button
                         type="button"
                         onClick={() => toggleFolder(node.path)}
-                        class="w-full flex items-center gap-3 py-3.5 text-left hover:bg-slate-50/80 transition-colors"
-                        style={{ paddingLeft: 20, paddingRight: 20 }}
+                        class="w-full flex items-center gap-4 px-5 py-3.5 text-left hover:bg-slate-50/80 transition-colors"
                       >
                         {expandedFolderPaths.value.has(node.path) ? (
                           <FolderOpen

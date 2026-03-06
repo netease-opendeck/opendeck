@@ -2,6 +2,13 @@ import { defineComponent } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Package, HardDrive, ClipboardList } from 'lucide-vue-next';
 import LanguageSwitcher from './LanguageSwitcher';
+import OpenDeckLogo from '@/assets/open-deck.svg';
+
+const LogoIcon = () => (
+  <div class="w-10 h-10 flex items-center justify-center overflow-hidden">
+    <img src={OpenDeckLogo} alt="OpenDeck logo" class="w-9 h-9 object-contain" />
+  </div>
+);
 
 const menuItems = [
   { id: 'taskManagement', labelKey: 'sidebar.task' as const, icon: ClipboardList },
@@ -19,6 +26,9 @@ export default defineComponent({
     const { t } = useI18n();
     return () => (
       <div class="w-16 h-full bg-[#141414] text-white flex flex-col items-center py-6 flex-shrink-0 border-r border-white/5">
+        <div class="mb-6">
+          <LogoIcon />
+        </div>
         <nav class="flex-1 flex flex-col gap-4">
           {menuItems.map((item) => {
             const Icon = item.icon;

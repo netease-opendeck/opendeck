@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="240px" height="240px" viewBox="0 0 240 240" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>编组</title>
+    <defs>
+        <path d="M72,0 C76.418278,0 80,3.581722 80,8 L80,172 C80,176.418278 76.418278,180 72,180 L8,180 C3.581722,180 0,176.418278 0,172 L0,8 C0,3.581722 3.581722,8.8817842e-16 8,0 L72,0 Z M62,10 L18,10 C13.581722,10 10,13.581722 10,18 L10,162 C10,166.418278 13.581722,170 18,170 L62,170 C66.418278,170 70,166.418278 70,162 L70,18 C70,13.581722 66.418278,10 62,10 Z" id="path-1"></path>
+        <filter x="-17.5%" y="-5.6%" width="135.0%" height="115.6%" filterUnits="objectBoundingBox" id="filter-2">
+            <feOffset dx="0" dy="4" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="4" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.25 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <rect id="path-3" x="16" y="16" width="48" height="148" rx="8"></rect>
+        <filter x="-29.2%" y="-6.8%" width="158.3%" height="118.9%" filterUnits="objectBoundingBox" id="filter-4">
+            <feOffset dx="0" dy="4" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="4" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.25 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <path d="M42,1 L42,181 L8,181 C3.581722,181 0,177.418278 0,173 L0,9 C0,4.581722 3.581722,1 8,1 L42,1 Z M21,172 C19.3431458,172 18,173.343146 18,175 C18,176.656854 19.3431458,178 21,178 C22.6568542,178 24,176.656854 24,175 C24,173.343146 22.6568542,172 21,172 Z M33,172 C31.3431458,172 30,173.343146 30,175 C30,176.656854 31.3431458,178 33,178 C34.6568542,178 36,176.656854 36,175 C36,173.343146 34.6568542,172 33,172 Z M9,12 C7.34314575,12 6,13.3431458 6,15 L6,175 C6,176.656854 7.34314575,178 9,178 C10.6568542,178 12,176.656854 12,175 L12,15 C12,13.3431458 10.6568542,12 9,12 Z M21,95 C19.3431458,95 18,96.3431458 18,98 L18,166 C18,167.656854 19.3431458,169 21,169 C22.6568542,169 24,167.656854 24,166 L24,98 C24,96.3431458 22.6568542,95 21,95 Z M21,3 C19.3431458,3 18,4.34314575 18,6 L18,74 C18,75.6568542 19.3431458,77 21,77 C22.6568542,77 24,75.6568542 24,74 L24,6 C24,4.34314575 22.6568542,3 21,3 Z M9,3 C7.34314575,3 6,4.34314575 6,6 C6,7.65685425 7.34314575,9 9,9 C10.6568542,9 12,7.65685425 12,6 C12,4.34314575 10.6568542,3 9,3 Z M33,3 C31.3431458,3 30,4.34314575 30,6 C30,7.65685425 31.3431458,9 33,9 C34.6568542,9 36,7.65685425 36,6 C36,4.34314575 34.6568542,3 33,3 Z" id="path-5"></path>
+        <filter x="-33.3%" y="-5.6%" width="166.7%" height="115.6%" filterUnits="objectBoundingBox" id="filter-6">
+            <feOffset dx="0" dy="4" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="4" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.25 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="页面-5" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="编组">
+            <rect id="矩形" fill-opacity="0" fill="#369ED7" x="0" y="0" width="240" height="240"></rect>
+            <g transform="translate(56, 29)">
+                <g transform="translate(48, 1)">
+                    <g>
+                        <g id="形状结合">
+                            <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                            <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-1"></use>
+                        </g>
+                        <g id="矩形-2">
+                            <use fill="black" fill-opacity="1" filter="url(#filter-4)" xlink:href="#path-3"></use>
+                            <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-3"></use>
+                        </g>
+                    </g>
+                    <g transform="translate(10, 10)"></g>
+                </g>
+                <g id="形状结合">
+                    <use fill="black" fill-opacity="1" filter="url(#filter-6)" xlink:href="#path-5"></use>
+                    <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-5"></use>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
