@@ -74,8 +74,7 @@ cd open-deck
 
 ## 访问
 
-- 前端：http://localhost:5174
-- 后端 API：http://localhost:3000
+- 应用（前端 + API）：http://localhost:19520
 
 ## 包管理器（pnpm / npm）
 

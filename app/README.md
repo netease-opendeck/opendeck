@@ -17,7 +17,8 @@ pnpm install
 pnpm run dev
 ```
 
-访问 http://localhost:5174
+开发环境访问前端：http://localhost:5174
+生产环境通过后端托管前端，访问：http://localhost:19520
 
 ## 构建
 

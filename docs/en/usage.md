@@ -9,7 +9,7 @@ DECK reads data from your OpenClaw installation. Configure the backend via envir
 | `OPENCLAW_ROOT` | Yes | OpenClaw project root (e.g. `~/.openclaw`) |
 | `OPENCLAW_SKILLS_PATH` | No | Relative path to skills (default: `workspace/skills`) |
 | `OPENCLAW_SKILL_EXECUTION_PATH` | No | Relative path to execution log (default: `workspace/tracker-result/skill-execution.jsonl`) |
-| `PORT` | No | Backend port (default: 3000) |
+| `PORT` | No | Backend port (default: 19520) |
 
 Copy `backend/.env.example` to `backend/.env` and set `OPENCLAW_ROOT` before running `deck start`.
 
@@ -23,7 +23,7 @@ Copy `backend/.env.example` to `backend/.env` and set `OPENCLAW_ROOT` before run
 
 With the backend running, Swagger is available at:
 
-- http://localhost:3000/api/docs
+- http://localhost:19520/api/docs
 
 Main endpoints:
 

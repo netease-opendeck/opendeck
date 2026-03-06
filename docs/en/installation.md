@@ -72,8 +72,7 @@ Run `deck remove` to remove the install directory and PATH changes.
 
 ## Access
 
-- **Frontend:** http://localhost:5174  
-- **Backend API:** http://localhost:3000  
+- **App (frontend + API):** http://localhost:19520  
 
 ## Package manager (pnpm / npm)
 

@@ -40,8 +40,7 @@ After install, the `deck` command is on your PATH:
 deck start
 ```
 
-- **Frontend:** http://localhost:5174  
-- **Backend API:** http://localhost:3000  
+- **App (frontend + API):** http://localhost:19520  
 
 Use `deck stop`, `deck restart`, `deck status`, and `deck help` as needed.
 
@@ -86,13 +85,7 @@ OpenClaw (workspace/skills, workspace/tracker-result/skill-execution.jsonl)
                     ▼
 ┌─────────────────────────────────────┐
 │           DECK Backend              │
-│         (NestJS, port 3000)         │
-└──────────────────┬──────────────────┘
-                    │
-                    ▼
-┌─────────────────────────────────────┐
-│           DECK Frontend             │
-│         (Vue 3, port 5174)           │
+│   (NestJS, serves frontend, 19520)  │
 └─────────────────────────────────────┘
 ```
 
@@ -111,9 +104,9 @@ Optional: `OPENCLAW_SKILLS_PATH`, `OPENCLAW_SKILL_EXECUTION_PATH`, `PORT`. See [
 
 | Command       | Description                          |
 |---------------|--------------------------------------|
-| `deck start`  | Start backend and frontend           |
-| `deck stop`   | Stop both                            |
-| `deck restart`| Restart both                         |
+| `deck start`  | Start backend (serves frontend)      |
+| `deck stop`   | Stop backend                         |
+| `deck restart`| Restart backend                      |
 | `deck status` | Show PM2 status                      |
 | `deck help`   | Show help                            |
 | `deck remove` | Stop, remove install dir and skills  |

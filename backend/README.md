@@ -35,7 +35,7 @@ cp .env.example .env
 | `OPENCLAW_ROOT` | Yes | OpenClaw project root (e.g. `~/.openclaw`) |
 | `OPENCLAW_SKILLS_PATH` | No | Relative to OPENCLAW_ROOT (default: `workspace/skills`) |
 | `OPENCLAW_SKILL_EXECUTION_PATH` | No | Relative to OPENCLAW_ROOT (default: `workspace/tracker-result/skill-execution.jsonl`) |
-| `PORT` | No | Server port (default: 3000) |
+| `PORT` | No | Server port (default: 19520) |
 
 ### 3. Build and run
 
@@ -52,7 +52,7 @@ pnpm run dev
 
 ### 4. API docs (Swagger)
 
-After start: http://localhost:3000/api/docs
+After start: http://localhost:19520/api/docs
 
 ## Endpoints
 
