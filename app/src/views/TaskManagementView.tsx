@@ -4,6 +4,9 @@ import { ClipboardList, Calendar, Archive } from 'lucide-vue-next';
 import { getTimeGroupKey } from '@/utils/date';
 import TaskGroupList from '@/components/tasks/TaskGroupList';
 import ExecutionDetailSidebar from '@/components/tasks/ExecutionDetailSidebar';
+import { VueDatePicker } from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
+import { zhCN, enUS } from 'date-fns/locale';
 import type {
   TaskHistoryApiError,
   TaskHistoryItem,
@@ -23,8 +26,8 @@ export default defineComponent({
     const statsError = ref<TaskHistoryApiError | null>(null);
 
     const selectedTask = ref<TaskHistoryItem | null>(null);
-    const filterStart = ref('');
-    const filterEnd = ref('');
+    const filterStart = ref<Date | null>(null);
+    const filterEnd = ref<Date | null>(null);
 
     const taskStats = computed<TaskHistoryStats>(() => ({
       today: stats.value?.today ?? 0,
@@ -34,12 +37,23 @@ export default defineComponent({
 
     const filteredTasks = computed(() => {
       if (!filterStart.value && !filterEnd.value) return tasks.value;
-      const startTs = filterStart.value
-        ? new Date(filterStart.value).setHours(0, 0, 0, 0)
-        : 0;
-      const endTs = filterEnd.value
-        ? new Date(filterEnd.value).setHours(23, 59, 59, 999)
-        : Infinity;
+
+      let startTs = 0;
+      if (filterStart.value) {
+        const ms = filterStart.value.getTime();
+        if (!Number.isNaN(ms)) {
+          startTs = new Date(ms).setHours(0, 0, 0, 0);
+        }
+      }
+
+      let endTs = Infinity;
+      if (filterEnd.value) {
+        const ms = filterEnd.value.getTime();
+        if (!Number.isNaN(ms)) {
+          endTs = new Date(ms).setHours(23, 59, 59, 999);
+        }
+      }
+
       return tasks.value.filter((t) => {
         const ts = t.endedAt ?? t.startedAt;
         if (!ts) return false;
@@ -161,39 +175,55 @@ export default defineComponent({
                 {t('task.statsError')}：{statsError.value.message}
               </p>
             )}
-            <div class="flex flex-wrap items-center justify-end gap-3">
-              <span class="text-xs font-medium text-slate-500">{t('task.dateFilter')}</span>
-              <input
-                type="date"
-                value={filterStart.value}
-                onInput={(e: Event) => {
-                  filterStart.value = (e.target as HTMLInputElement).value;
-                }}
-                class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300"
-                title={t('task.startDate')}
-              />
-              <span class="text-slate-400">{t('task.to')}</span>
-              <input
-                type="date"
-                value={filterEnd.value}
-                onInput={(e: Event) => {
-                  filterEnd.value = (e.target as HTMLInputElement).value;
-                }}
-                class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300"
-                title={t('task.endDate')}
-              />
-              {(filterStart.value || filterEnd.value) && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    filterStart.value = '';
-                    filterEnd.value = '';
+            <div class="flex justify-end">
+              <div class="inline-flex items-center gap-2 flex-nowrap">
+                <span class="text-xs font-medium text-slate-500 whitespace-nowrap">
+                  {t('task.dateFilter')}
+                </span>
+                <VueDatePicker
+                  modelValue={filterStart.value}
+                  format="yyyy/MM/dd"
+                  enableTime={false}
+                  autoApply
+                  clearable={false}
+                  locale={locale.value === 'zh' ? zhCN : enUS}
+                  inputClass="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300 w-[120px]"
+                  placeholder={locale.value === 'zh' ? '年/月/日' : 'yyyy/mm/dd'}
+                  {...{
+                    'onUpdate:modelValue': (val: Date | null) => {
+                      filterStart.value = val;
+                    },
                   }}
-                  class="text-xs font-medium text-slate-500 hover:text-indigo-600"
-                >
-                  {t('task.clear')}
-                </button>
-              )}
+                />
+                <span class="text-slate-400">{t('task.to')}</span>
+                <VueDatePicker
+                  modelValue={filterEnd.value}
+                  format="yyyy/MM/dd"
+                  enableTime={false}
+                  autoApply
+                  clearable={false}
+                  locale={locale.value === 'zh' ? zhCN : enUS}
+                  inputClass="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300 w-[120px]"
+                  placeholder={locale.value === 'zh' ? '年/月/日' : 'yyyy/mm/dd'}
+                  {...{
+                    'onUpdate:modelValue': (val: Date | null) => {
+                      filterEnd.value = val;
+                    },
+                  }}
+                />
+                {(filterStart.value || filterEnd.value) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      filterStart.value = null;
+                      filterEnd.value = null;
+                    }}
+                    class="text-xs font-medium text-slate-500 hover:text-indigo-600 whitespace-nowrap"
+                  >
+                    {t('task.clear')}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </header>

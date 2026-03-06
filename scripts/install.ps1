@@ -132,6 +132,37 @@ if ($FromLocal) {
     }
 }
 
+# 配置 backend\.env 中的 OPENCLAW_ROOT
+$backendDir = Join-Path $INSTALL_DIR "backend"
+$backendEnv = Join-Path $backendDir ".env"
+$backendExample = Join-Path $backendDir ".env.example"
+if (Test-Path $backendDir -PathType Container) {
+    $defaultRoot = Join-Path $env:USERPROFILE ".openclaw"
+    $openclawRoot = $defaultRoot
+    if ($Yes) {
+        Write-Host "[backend/.env] 检测到 -Yes 模式，使用默认 OPENCLAW_ROOT: $defaultRoot"
+    } else {
+        $inputRoot = Read-Host "[backend/.env] 请输入 OpenClaw 根目录 OPENCLAW_ROOT（回车使用默认: $defaultRoot）"
+        if ($inputRoot) { $openclawRoot = $inputRoot }
+    }
+
+    if (-not (Test-Path $backendEnv -PathType Leaf)) {
+        if (Test-Path $backendExample -PathType Leaf) {
+            Copy-Item -Path $backendExample -Destination $backendEnv -Force
+        } else {
+            "# OpenClaw 项目根目录（由安装脚本自动写入）`nOPENCLAW_ROOT=$openclawRoot" | Set-Content $backendEnv -Encoding utf8
+        }
+    } else {
+        $content = Get-Content -Path $backendEnv -Raw -Encoding utf8
+        if ($content -match '^OPENCLAW_ROOT=.*') {
+            $content = $content -replace '^OPENCLAW_ROOT=.*', "OPENCLAW_ROOT=$openclawRoot"
+        } else {
+            $content = "$content`nOPENCLAW_ROOT=$openclawRoot`n"
+        }
+        Set-Content -Path $backendEnv -Value $content -Encoding utf8
+    }
+}
+
 # 安装内置 skills
 $SKILLS_SRC = Join-Path $INSTALL_DIR "skills"
 $INSTALLED_LIST = Join-Path $INSTALL_DIR ".installed_skills"

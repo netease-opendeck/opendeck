@@ -42,6 +42,57 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+configure_backend_env() {
+  local backend_dir="$INSTALL_DIR/backend"
+  local backend_env="$backend_dir/.env"
+  local backend_example="$backend_dir/.env.example"
+
+  if [ ! -d "$backend_dir" ]; then
+    return 0
+  fi
+
+  local default_root="$HOME/.openclaw"
+  local openclaw_root="$default_root"
+
+  if [ "$YES_MODE" = true ]; then
+    echo "[backend/.env] 检测到 -y 模式，使用默认 OPENCLAW_ROOT: $default_root"
+  else
+    printf "[backend/.env] 请输入 OpenClaw 根目录 OPENCLAW_ROOT（回车使用默认: %s）: " "$default_root"
+    read -r input_root || input_root=""
+    if [ -n "$input_root" ]; then
+      openclaw_root="$input_root"
+    fi
+  fi
+
+  if [ ! -f "$backend_env" ]; then
+    if [ -f "$backend_example" ]; then
+      cp "$backend_example" "$backend_env"
+    else
+      {
+        echo "# OpenClaw 项目根目录（由安装脚本自动写入）"
+        echo "OPENCLAW_ROOT=$openclaw_root"
+      } > "$backend_env"
+      return 0
+    fi
+  fi
+
+  tmp_env="${backend_env}.tmp.$$"
+  awk -v root="$openclaw_root" '
+    BEGIN { replaced = 0 }
+    /^OPENCLAW_ROOT=/ {
+      print "OPENCLAW_ROOT=" root
+      replaced = 1
+      next
+    }
+    { print }
+    END {
+      if (!replaced) {
+        print "OPENCLAW_ROOT=" root
+      }
+    }
+  ' "$backend_env" > "$tmp_env" && mv "$tmp_env" "$backend_env"
+}
+
 # 更新 .openclaw 下的 AGENTS.md，追加 Mandatory Workflow 配置
 update_agents_md() {
   local script_dir
@@ -218,6 +269,9 @@ else
   fi
   chmod +x "$INSTALL_DIR/deck"
 fi
+
+# 配置 backend/.env 中的 OPENCLAW_ROOT
+configure_backend_env
 
 # 6. 安装内置 skills（含同名覆盖确认）
 SKILLS_SRC="$INSTALL_DIR/skills"
