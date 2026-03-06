@@ -1,0 +1,8 @@
+{
+  "skills": {
+    "entries": {
+      "aliyun-oss": { "enabled": true },
+      "disabled-by-config": { "enabled": false }
+    }
+  }
+}
