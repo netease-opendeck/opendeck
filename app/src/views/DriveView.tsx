@@ -18,7 +18,20 @@ import { fetchFiles, fetchFileStats, fetchFileTree } from '@/composables/useFile
 import FileContentModal from '@/components/drive/FileContentModal';
 import type { FileApiError, FileItem, FileStats, FileTreeNode } from '@/types';
 
-function inferFileType(filePath: string): 'file' | 'link' | 'text' {
+type FileKind = 'file' | 'link' | 'text';
+type FileGroup = 'markdown' | 'text' | 'pdf' | 'office' | 'image' | 'code' | 'other';
+
+const FILE_GROUP_LABELS: Record<FileGroup, string> = {
+  markdown: 'Markdown',
+  text: 'Text',
+  pdf: 'PDF',
+  office: 'Office',
+  image: 'Image',
+  code: 'Code',
+  other: 'Other',
+};
+
+function inferFileType(filePath: string): FileKind {
   if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
     return 'link';
   }
@@ -35,7 +48,87 @@ function inferFileType(filePath: string): 'file' | 'link' | 'text' {
   return 'file';
 }
 
-function getIcon(type: 'file' | 'link' | 'text') {
+function getFileGroup(filePath: string): FileGroup {
+  const lower = filePath.toLowerCase();
+  if (lower.startsWith('http://') || lower.startsWith('https://')) {
+    return 'other';
+  }
+  const name = lower.split('/').pop() ?? lower;
+  const dot = name.lastIndexOf('.');
+  if (dot === -1 || dot === name.length - 1) return 'other';
+  const ext = name.slice(dot + 1);
+
+  if (ext === 'md' || ext === 'markdown') return 'markdown';
+
+  if (ext === 'txt' || ext === 'log' || ext === 'json' || ext === 'csv') {
+    return 'text';
+  }
+
+  if (ext === 'pdf') return 'pdf';
+
+  if (
+    ext === 'doc' ||
+    ext === 'docx' ||
+    ext === 'xls' ||
+    ext === 'xlsx' ||
+    ext === 'ppt' ||
+    ext === 'pptx' ||
+    ext === 'key' ||
+    ext === 'numbers' ||
+    ext === 'pages'
+  ) {
+    return 'office';
+  }
+
+  if (
+    ext === 'png' ||
+    ext === 'jpg' ||
+    ext === 'jpeg' ||
+    ext === 'gif' ||
+    ext === 'webp' ||
+    ext === 'svg' ||
+    ext === 'bmp' ||
+    ext === 'ico'
+  ) {
+    return 'image';
+  }
+
+  if (
+    ext === 'js' ||
+    ext === 'ts' ||
+    ext === 'tsx' ||
+    ext === 'jsx' ||
+    ext === 'py' ||
+    ext === 'java' ||
+    ext === 'go' ||
+    ext === 'rs' ||
+    ext === 'rb' ||
+    ext === 'php' ||
+    ext === 'sh' ||
+    ext === 'bash' ||
+    ext === 'zsh' ||
+    ext === 'c' ||
+    ext === 'cpp' ||
+    ext === 'h' ||
+    ext === 'hpp' ||
+    ext === 'cs' ||
+    ext === 'kt' ||
+    ext === 'swift' ||
+    ext === 'scala' ||
+    ext === 'sql' ||
+    ext === 'yml' ||
+    ext === 'yaml' ||
+    ext === 'toml' ||
+    ext === 'ini' ||
+    ext === 'cfg'
+  ) {
+    return 'code';
+  }
+
+  return 'other';
+}
+
+function getIcon(type: FileKind) {
   if (type === 'file') return File;
   if (type === 'link') return ExternalLink;
   return FileText;
@@ -47,7 +140,7 @@ export default defineComponent({
     const { t, locale } = useI18n();
     const dateLocale = () => (locale.value === 'zh' ? 'zh-CN' : 'en-US');
     const search = ref('');
-    const typeFilter = ref<'all' | 'file' | 'link' | 'text'>('all');
+    const typeFilter = ref<'all' | FileGroup>('all');
     const viewMode = ref<'time' | 'folder'>('time');
     const expandedFolderPaths = ref<Set<string>>(new Set());
     const files = ref<FileItem[]>([]);
@@ -110,9 +203,9 @@ export default defineComponent({
 
     const fileMatches = (file: FileItem) => {
       const q = search.value.trim().toLowerCase();
-      const type = inferFileType(file.filePath);
+      const group = getFileGroup(file.filePath);
       const matchesType =
-        typeFilter.value === 'all' || typeFilter.value === type;
+        typeFilter.value === 'all' || typeFilter.value === group;
       const matchesSearch =
         !q ||
         file.fileName.toLowerCase().includes(q) ||
@@ -122,6 +215,31 @@ export default defineComponent({
 
     const filteredFiles = computed(() => {
       return files.value.filter((file) => fileMatches(file));
+    });
+
+    const typeOptions = computed(() => {
+      const set = new Set<FileGroup>();
+      files.value.forEach((file) => {
+        set.add(getFileGroup(file.filePath));
+      });
+      const order: Array<'all' | FileGroup> = [
+        'all',
+        'markdown',
+        'text',
+        'pdf',
+        'office',
+        'image',
+        'code',
+        'other',
+      ];
+      return order
+        .filter((key) => key === 'all' || set.has(key as FileGroup))
+        .map((key) => {
+          if (key === 'all') {
+            return { key: 'all', label: 'All' };
+          }
+          return { key, label: FILE_GROUP_LABELS[key as FileGroup] };
+        });
     });
 
     const filteredFileTree = computed(() => {
@@ -273,11 +391,12 @@ export default defineComponent({
                 <FileSearchBar
                   search={search.value}
                   typeFilter={typeFilter.value}
+                  typeOptions={typeOptions.value}
                   onUpdateSearch={(v: string) => {
                     search.value = v;
                   }}
-                  onUpdateTypeFilter={(v: 'all' | 'file' | 'link' | 'text') => {
-                    typeFilter.value = v;
+                  onUpdateTypeFilter={(v: string) => {
+                    typeFilter.value = v as 'all' | FileGroup;
                   }}
                 />
               </div>

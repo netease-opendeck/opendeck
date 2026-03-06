@@ -60,6 +60,13 @@ In your OpenClaw chat, add this prompt once so the assistant loads and follows t
 
 - **English:** Read AGENTS.MD and skill-tracker/SKILL.MD, and follow them strictly.
 
+## Recommended language models
+
+DECK works with any model that your OpenClaw setup supports, but for better task tracking quality and response consistency we currently **recommend**:
+
+- **Opus 4.6** (high reasoning capability, good for complex multi-step tasks)
+- **GLM-5** (strong general-purpose model with good Chinese support)
+
 ## Highlights
 
 - **Skills** — Browse and inspect OpenClaw workspace skills (SKILL.md, metadata).
