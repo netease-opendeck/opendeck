@@ -80,7 +80,7 @@ Records are stored in: `workspace/tracker-result/skill-execution.jsonl` (one JSO
 **Notes:**
 
 - `sessionId` identifies the session; `turnId` identifies the specific conversation turn (e.g. `turn-1`, `turn-2`, ...).
-- `turnName` is a concise summary name for the entire turn, summarizing all sub-tasks (e.g. "查询合肥天气", "修改 skill-tracker 配置并同步 AGENTS.md"). Keep it short and descriptive.
+- `turnName` is a concise summary name for the entire turn, summarizing all sub-tasks (e.g. "Check weather in London", "Plan weekend trip itinerary"). Keep it short and descriptive.
 - `messages` is an array of chat messages for this turn. Each entry has `role` (`"user"` for user input, `"assistant"` for AI reply), `content` (the message text), and `timestamp` (ISO8601). Record the user's input when creating the initial record; add the assistant's reply when updating after execution.
 - `skills` is an array — a single turn may match multiple skills.
 - Each task has a `skill` field linking it to the skill it belongs to.
@@ -117,29 +117,52 @@ This final update only touches the current turn's line (the last line). All prio
 
 ## Usage
 
-This skill operates mostly silently. The only user-visible output is: after a record is successfully saved, briefly remind the user that they can view the task execution record in the **Deck**. Keep the reminder short and natural, and **append the Deck frontend URL** if available.
+This skill operates **completely silently** during execution — it must NEVER interfere with, delay, or alter the normal reply content to the user.
 
-**Language rule:** The reminder message MUST be written in the same language the user used in their message. For example, if the user wrote in Chinese, respond in Chinese; if in English, respond in English. Match the user's language exactly.
+**Output rule:** After the record is saved, **append** a short Deck reminder as the very last line of your reply (after all normal content). The reminder must be separated from the main reply by a blank line. It should feel like a subtle footer, not part of the answer itself.
 
-### Deck Frontend URL Detection (mandatory, every turn)
+**Language rule:** The reminder line MUST be written in the same language the user used in their message.
 
-**Every time** a record is saved, you MUST run the following shell command to detect the Deck frontend URL in real time. The port is NOT fixed — do NOT cache, hardcode, or reuse a previous result. Always execute the command fresh.
+**Do NOT:**
+- Put the Deck reminder before or inside your main reply
+- Let skill-tracker processing delay or affect the quality of your response
+- Mention skill-tracker internals, JSON structure, or file paths to the user
+
+### Deck URL Detection (mandatory, every turn)
+
+**Every time** a record is saved, you MUST run the following shell command to detect the Deck URL in real time. The port is NOT fixed — do NOT cache, hardcode, or reuse a previous result. Always execute the command fresh.
 
 ```bash
 pm2 jlist 2>/dev/null | node -e "
   let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{
-    try{const l=JSON.parse(d);const f=l.find(p=>p.name==='deck-frontend'&&p.pm2_env&&p.pm2_env.status==='online');
-    if(f){const a=Array.isArray(f.pm2_env.args)?f.pm2_env.args.join(' '):(f.pm2_env.args||'');
-    const m=a.match(/-l\s+(\d+)/);const port=m?m[1]:'5174';
-    console.log('http://localhost:'+port)}else{process.exit(1)}}catch(e){process.exit(1)}})
+    try{const l=JSON.parse(d);const f=l.find(p=>p.name==='deck-backend'&&p.pm2_env&&p.pm2_env.status==='online');
+    if(f){
+      const cwd=f.pm2_env.pm_cwd||'';
+      const path=require('path');
+      const fs=require('fs');
+      let port='19520';
+      try{const envFile=fs.readFileSync(path.join(cwd,'.env'),'utf8');const m=envFile.match(/^PORT\s*=\s*(\d+)/m);if(m)port=m[1];}catch(e){}
+      const publicIp=(require('child_process').execSync('curl -s --connect-timeout 3 ifconfig.me 2>/dev/null').toString()||'').trim();
+      if(publicIp){
+        const http=require('http');
+        const req=http.get('http://'+publicIp+':'+port+'/',{timeout:3000},res=>{
+          console.log('http://'+publicIp+':'+port);process.exit(0);
+        });
+        req.on('error',()=>{console.log('http://localhost:'+port);process.exit(0);});
+        req.on('timeout',()=>{req.destroy();console.log('http://localhost:'+port);process.exit(0);});
+      }else{console.log('http://localhost:'+port);process.exit(0);}
+    }else{process.exit(1)}}catch(e){process.exit(1)}})
 "
 ```
 
 **Behavior:**
 
-- Command succeeds → append the URL to the reminder, using the user's language. Examples:
-  - English user: `"📋 Task recorded — view details in Deck: [Deck](http://localhost:5174)"`
-- Command fails (process not found, not online, pm2 not installed, etc.) → skip the URL silently, using the user's language. Examples:
-  - English user: `"📋 Task recorded — check the Deck for details."`
+1. Find the `deck-backend` process (not `deck-frontend`) in PM2.
+2. Read the backend `.env` file to detect the `PORT` (default `19520`).
+3. Get the public IP and try to access `http://<public_ip>:<port>/`. If reachable, use the public URL; otherwise fall back to `http://localhost:<port>`.
+4. Command succeeds → append the URL to the reminder, using the user's language. Examples:
+   - English user: `"📋 Task recorded — view details in Deck: [Deck](http://103.126.92.85:19520)"`
+5. Command fails (process not found, not online, pm2 not installed, etc.) → skip the URL silently, using the user's language. Examples:
+   - English user: `"📋 Task recorded — check the Deck for details."`
 
 Do not expose internal JSON structure or file paths to the user.
