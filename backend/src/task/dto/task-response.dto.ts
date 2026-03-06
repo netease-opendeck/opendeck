@@ -22,12 +22,26 @@ export class TaskArtifactDto {
   absolutePath: string;
 }
 
+export class ChildTaskDto {
+  @ApiProperty({ description: '子任务 ID' })
+  id: string;
+
+  @ApiProperty({ description: '子任务名称', required: false, nullable: true })
+  name: string | null;
+
+  @ApiProperty({ description: '子任务状态', required: false, nullable: true })
+  status: string | null;
+
+  @ApiProperty({ description: '子任务错误信息', required: false, nullable: true })
+  error: string | null;
+}
+
 export class TaskItemDto {
   @ApiProperty({ description: '任务名称' })
   taskName: string | null;
 
-  @ApiProperty({ description: '技能名称' })
-  skillName: string;
+  @ApiProperty({ description: '技能名称列表' })
+  skillNames: string[];
 
   @ApiProperty({ description: '任务开始时间', required: false, nullable: true })
   startedAt: string | null;
@@ -38,14 +52,14 @@ export class TaskItemDto {
   @ApiProperty({ description: '错误信息', required: false, nullable: true })
   error: string | null;
 
-  @ApiProperty({ description: '任务详情', required: false, nullable: true })
-  detail: string | null;
-
   @ApiProperty({ type: [TaskArtifactDto], description: '任务产生的文件列表' })
   artifacts: TaskArtifactDto[];
 
   @ApiProperty({ type: [TaskMessageDto], description: '该轮对话消息' })
   messages: TaskMessageDto[];
+
+  @ApiProperty({ type: [ChildTaskDto], description: '子任务列表' })
+  childrenTasks: ChildTaskDto[];
 }
 
 export class TasksListResponseDto {

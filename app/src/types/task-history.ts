@@ -10,16 +10,23 @@ export interface TaskMessage {
   timestamp?: string;
 }
 
+export interface ChildTask {
+  id: string;
+  name: string | null;
+  status: string | null;
+  error: string | null;
+}
+
 export interface TaskHistoryItem {
   id: string;
   taskName: string | null;
-  skillName: string;
+  skillNames: string[];
   startedAt: string | null;
   endedAt: string | null;
   error: string | null;
-  detail: string | null;
   artifacts: TaskArtifact[];
   messages: TaskMessage[];
+  childrenTasks: ChildTask[];
 }
 
 export interface TaskHistoryStats {

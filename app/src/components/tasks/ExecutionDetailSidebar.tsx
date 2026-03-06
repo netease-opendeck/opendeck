@@ -14,7 +14,10 @@ export default defineComponent({
     const dateLocale = () => (locale.value === 'zh' ? 'zh-CN' : 'en-US');
 
     const displayTitle = () =>
-      props.task.taskName ?? props.task.skillName ?? t('task.unnamed');
+      props.task.taskName ??
+      (props.task.skillNames && props.task.skillNames.length > 0
+        ? props.task.skillNames[0]
+        : t('task.unnamed'));
 
     const hasError = () => props.task.error !== null;
 
@@ -89,14 +92,39 @@ export default defineComponent({
             </div>
           </div>
           <div class="flex-1 overflow-y-auto min-h-0">
-            {props.task.detail && (
+            {props.task.childrenTasks && props.task.childrenTasks.length > 0 && (
               <section class="p-4 border-b border-slate-100">
                 <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
-                  {t('task.detail')}
+                  {t('task.steps')}
                 </h4>
-                <p class="text-xs text-slate-600 leading-relaxed whitespace-pre-wrap">
-                  {props.task.detail}
-                </p>
+                <ul class="space-y-2">
+                  {props.task.childrenTasks.map((child) => {
+                    const isError = child.error !== null;
+                    const isCompleted = !isError && child.status === 'completed';
+                    const iconClass = isError
+                      ? 'text-red-500'
+                      : isCompleted
+                      ? 'text-green-500'
+                      : 'text-slate-400';
+                    return (
+                      <li
+                        key={child.id}
+                        class="flex items-center gap-2 text-xs text-slate-700"
+                      >
+                        <span class={`shrink-0 ${iconClass}`}>
+                          {isError ? (
+                            <AlertCircle size={14} />
+                          ) : (
+                            <CheckCircle2 size={14} />
+                          )}
+                        </span>
+                        <span class="truncate">
+                          {child.name || t('task.unnamed')}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
               </section>
             )}
 

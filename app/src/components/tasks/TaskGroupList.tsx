@@ -40,7 +40,10 @@ export default defineComponent({
                     >
                       <div class="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
                         <p class="font-bold text-slate-900 truncate">
-                          {task.taskName ?? task.skillName ?? t('task.unnamed')}
+                          {task.taskName ??
+                            (task.skillNames && task.skillNames.length > 0
+                              ? task.skillNames[0]
+                              : t('task.unnamed'))}
                         </p>
                       </div>
                       {timeLabelSource && (

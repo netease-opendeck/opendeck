@@ -9,17 +9,17 @@ import type {
 interface TasksListResponseDto {
   tasks: {
     taskName: string | null;
-    skillName: string;
+    skillNames: string[];
     startedAt: string | null;
     endedAt: string | null;
     error: string | null;
-    detail: string | null;
     artifacts: {
       fileName: string;
       fileSize: number | null;
       absolutePath: string;
     }[];
     messages?: { role: string; content: string; timestamp?: string }[];
+    childrenTasks?: { id: string; name: string | null; status: string | null; error: string | null }[];
   }[];
 }
 
@@ -76,7 +76,7 @@ export async function fetchTasks(): Promise<TaskHistoryItem[]> {
     const res = await http.get<TasksListResponseDto>('/tasks');
     const list = res.data.tasks ?? [];
     return list.map((t, index): TaskHistoryItem => {
-      const idBase = t.taskName ?? t.skillName ?? 'task';
+      const idBase = t.taskName ?? t.skillNames?.[0] ?? 'task';
       const idTime = t.startedAt ?? t.endedAt ?? String(index);
       const id = `${idBase}-${idTime}-${index}`;
 
@@ -96,13 +96,19 @@ export async function fetchTasks(): Promise<TaskHistoryItem[]> {
       return {
         id,
         taskName: t.taskName,
-        skillName: t.skillName,
+        skillNames: t.skillNames ?? [],
         startedAt: t.startedAt,
         endedAt: t.endedAt,
         error: t.error,
-        detail: t.detail,
         artifacts,
         messages,
+        childrenTasks:
+          t.childrenTasks?.map((c) => ({
+            id: c.id,
+            name: c.name,
+            status: c.status,
+            error: c.error,
+          })) ?? [],
       };
     });
   } catch (error) {

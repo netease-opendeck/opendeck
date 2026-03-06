@@ -15,6 +15,7 @@ export interface TaskRecord {
   status?: string;
   startedAt?: string;
   endedAt?: string;
+  output?: string | null;
   error?: string | null;
 }
 
@@ -27,6 +28,7 @@ export interface MessageRecord {
 export interface ExecutionRecord {
   sessionId?: string;
   turnId?: string;
+  turnName?: string;
   timestamp?: string;
   messages?: MessageRecord[];
   skills?: Array<{
