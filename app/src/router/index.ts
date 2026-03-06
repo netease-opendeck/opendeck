@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', redirect: '/solutions' },
+    { path: '/', redirect: '/task-management' },
     {
       path: '/solutions',
       name: 'solutions',

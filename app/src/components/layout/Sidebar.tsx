@@ -2,9 +2,9 @@ import { defineComponent } from 'vue';
 import { Package, HardDrive, ClipboardList } from 'lucide-vue-next';
 
 const menuItems = [
-  { id: 'solutions', label: '技能', icon: Package },
+  { id: 'taskManagement', label: '任务', icon: ClipboardList },
   { id: 'drive', label: '文件', icon: HardDrive },
-  { id: 'taskManagement', label: '历史任务', icon: ClipboardList },
+  { id: 'solutions', label: '技能', icon: Package },
 ];
 
 export default defineComponent({

@@ -19,10 +19,10 @@ export default defineComponent({
 
     const activeTab = computed(() => {
       const path = route.path;
-      if (path.startsWith('/solutions')) return 'solutions';
-      if (path.startsWith('/drive')) return 'drive';
       if (path.startsWith('/task-management')) return 'taskManagement';
-      return 'solutions';
+      if (path.startsWith('/drive')) return 'drive';
+      if (path.startsWith('/solutions')) return 'solutions';
+      return 'taskManagement';
     });
 
     return () => (
