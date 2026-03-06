@@ -34,7 +34,7 @@ cp .env.example .env
 |----------|----------|-------------|
 | `OPENCLAW_ROOT` | Yes | OpenClaw project root (e.g. `~/.openclaw`) |
 | `OPENCLAW_SKILLS_PATH` | No | Relative to OPENCLAW_ROOT (default: `workspace/skills`) |
-| `OPENCLAW_SKILL_EXECUTION_PATH` | No | Relative to OPENCLAW_ROOT (default: `memory/skill-execution.jsonl`) |
+| `OPENCLAW_SKILL_EXECUTION_PATH` | No | Relative to OPENCLAW_ROOT (default: `workspace/tracker-result/skill-execution.jsonl`) |
 | `PORT` | No | Server port (default: 3000) |
 
 ### 3. Build and run

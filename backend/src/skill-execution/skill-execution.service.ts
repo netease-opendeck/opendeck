@@ -6,7 +6,7 @@ import { ExecutionRecord } from './interfaces/execution-record.interface';
 
 @Injectable()
 export class SkillExecutionService {
-  private readonly defaultExecutionPath = 'memory/skill-execution.jsonl';
+  private readonly defaultExecutionPath = 'workspace/tracker-result/skill-execution.jsonl';
 
   constructor(private readonly configService: ConfigService) {}
 

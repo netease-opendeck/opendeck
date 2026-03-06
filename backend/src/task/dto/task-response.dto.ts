@@ -1,5 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+export class TaskMessageDto {
+  @ApiProperty({ description: '角色' })
+  role: string;
+
+  @ApiProperty({ description: '消息内容' })
+  content: string;
+
+  @ApiProperty({ description: '时间戳', required: false })
+  timestamp?: string;
+}
+
 export class TaskArtifactDto {
   @ApiProperty({ description: '文件名' })
   fileName: string;
@@ -32,6 +43,9 @@ export class TaskItemDto {
 
   @ApiProperty({ type: [TaskArtifactDto], description: '任务产生的文件列表' })
   artifacts: TaskArtifactDto[];
+
+  @ApiProperty({ type: [TaskMessageDto], description: '该轮对话消息' })
+  messages: TaskMessageDto[];
 }
 
 export class TasksListResponseDto {

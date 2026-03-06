@@ -63,7 +63,7 @@ Then run `deck start` from the install directory, or add it to PATH as the insta
 ## How it works
 
 ```
-OpenClaw (workspace/skills, memory/skill-execution.jsonl)
+OpenClaw (workspace/skills, workspace/tracker-result/skill-execution.jsonl)
                     │
                     ▼
 ┌─────────────────────────────────────┐
@@ -78,7 +78,7 @@ OpenClaw (workspace/skills, memory/skill-execution.jsonl)
 └─────────────────────────────────────┘
 ```
 
-DECK reads from your OpenClaw root: skills from `workspace/skills` and execution data from `memory/skill-execution.jsonl`. No database—file-based.
+DECK reads from your OpenClaw root: skills from `workspace/skills` and execution data from `workspace/tracker-result/skill-execution.jsonl`. No database—file-based.
 
 ## Configuration
 

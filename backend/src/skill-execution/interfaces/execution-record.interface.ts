@@ -18,10 +18,17 @@ export interface TaskRecord {
   error?: string | null;
 }
 
+export interface MessageRecord {
+  role: string;
+  content: string;
+  timestamp?: string;
+}
+
 export interface ExecutionRecord {
   sessionId?: string;
   turnId?: string;
   timestamp?: string;
+  messages?: MessageRecord[];
   skills?: Array<{
     name: string;
     description?: string;

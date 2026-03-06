@@ -68,7 +68,7 @@ server: {
 - 开发环境下，Vite 通过 `server.proxy` 将 `/api` 转发到后端。
 - 运行文件模块需要后端服务已启动并配置：
   - 正确的 `OPENCLAW_ROOT` 环境变量。
-  - `OPENCLAW_SKILL_EXECUTION_PATH`（或默认 `memory/skill-execution.jsonl`）指向有效的执行记录 JSONL 文件。
+  - `OPENCLAW_SKILL_EXECUTION_PATH`（或默认 `workspace/tracker-result/skill-execution.jsonl`）指向有效的执行记录 JSONL 文件。
 
 ### 任务管理模块与后端依赖
 
@@ -78,4 +78,4 @@ server: {
 - 开发环境下，Vite 通过 `server.proxy` 将 `/api` 转发到后端。
 - 运行任务管理模块需要后端服务已启动并配置：
   - 正确的 `OPENCLAW_ROOT` 环境变量。
-  - `OPENCLAW_SKILL_EXECUTION_PATH`（或默认 `memory/skill-execution.jsonl`）指向有效的执行记录 JSONL 文件，作为任务与文件数据的来源。
+  - `OPENCLAW_SKILL_EXECUTION_PATH`（或默认 `workspace/tracker-result/skill-execution.jsonl`）指向有效的执行记录 JSONL 文件，作为任务与文件数据的来源。

@@ -19,6 +19,7 @@ interface TasksListResponseDto {
       fileSize: number | null;
       absolutePath: string;
     }[];
+    messages?: { role: string; content: string; timestamp?: string }[];
   }[];
 }
 
@@ -88,6 +89,12 @@ export async function fetchTasks(): Promise<TaskHistoryItem[]> {
           absolutePath: a.absolutePath,
         })) ?? [];
 
+      const messages = (t.messages ?? []).map((m) => ({
+        role: m.role,
+        content: m.content,
+        ...(m.timestamp != null && { timestamp: m.timestamp }),
+      }));
+
       return {
         id,
         taskName: t.taskName,
@@ -97,6 +104,7 @@ export async function fetchTasks(): Promise<TaskHistoryItem[]> {
         error: t.error,
         detail: t.detail,
         artifacts,
+        messages,
       };
     });
   } catch (error) {

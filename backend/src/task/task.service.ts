@@ -17,6 +17,12 @@ export class TaskService {
           absolutePath: a.absolutePath,
         })) ?? [];
 
+    const messages = (record.messages ?? []).map((m) => ({
+      role: m.role,
+      content: m.content,
+      ...(m.timestamp != null && { timestamp: m.timestamp }),
+    }));
+
     return {
       taskName: task.name ?? null,
       skillName: task.skill ?? 'none',
@@ -25,6 +31,7 @@ export class TaskService {
       error: (task.error ?? null) as string | null,
       detail: task.detail ?? null,
       artifacts,
+      messages,
     };
   }
 

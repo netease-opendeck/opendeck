@@ -18,6 +18,10 @@ describe('TaskController', () => {
       error: null,
       detail: '查询合肥当前天气及三天预报',
       artifacts: [],
+      messages: [
+        { role: 'user', content: '查询合肥天气', timestamp: '2026-03-05T08:54:00Z' },
+        { role: 'assistant', content: '合肥当前晴，15°C。', timestamp: '2026-03-05T08:54:10Z' },
+      ],
     },
   ];
 

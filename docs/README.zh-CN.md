@@ -63,7 +63,7 @@ pnpm run build
 ## 工作原理
 
 ```
-OpenClaw（workspace/skills、memory/skill-execution.jsonl）
+OpenClaw（workspace/skills、workspace/tracker-result/skill-execution.jsonl）
                     │
                     ▼
 ┌─────────────────────────────────────┐
@@ -78,7 +78,7 @@ OpenClaw（workspace/skills、memory/skill-execution.jsonl）
 └─────────────────────────────────────┘
 ```
 
-DECK 从你的 OpenClaw 根目录读取数据：技能来自 `workspace/skills`，执行记录来自 `memory/skill-execution.jsonl`。无需数据库，基于文件。
+DECK 从你的 OpenClaw 根目录读取数据：技能来自 `workspace/skills`，执行记录来自 `workspace/tracker-result/skill-execution.jsonl`。无需数据库，基于文件。
 
 ## 配置
 

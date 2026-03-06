@@ -4,6 +4,12 @@ export interface TaskArtifact {
   absolutePath: string;
 }
 
+export interface TaskMessage {
+  role: string;
+  content: string;
+  timestamp?: string;
+}
+
 export interface TaskHistoryItem {
   id: string;
   taskName: string | null;
@@ -13,6 +19,7 @@ export interface TaskHistoryItem {
   error: string | null;
   detail: string | null;
   artifacts: TaskArtifact[];
+  messages: TaskMessage[];
 }
 
 export interface TaskHistoryStats {
