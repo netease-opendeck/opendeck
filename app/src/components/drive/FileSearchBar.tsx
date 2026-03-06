@@ -1,4 +1,5 @@
 import { defineComponent } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Search } from 'lucide-vue-next';
 
 export default defineComponent({
@@ -12,13 +13,8 @@ export default defineComponent({
   },
   emits: ['updateSearch', 'updateTypeFilter'],
   setup(props, { emit }) {
+    const { t } = useI18n();
     const filters = ['all', 'file', 'link', 'text'] as const;
-    const labels: Record<string, string> = {
-      all: '全部',
-      file: '文件',
-      link: '链接',
-      text: '文本',
-    };
 
     return () => (
       <div class="flex flex-col sm:flex-row gap-3">
@@ -29,7 +25,7 @@ export default defineComponent({
           />
           <input
             type="text"
-            placeholder="搜索文件名..."
+            placeholder={t('drive.searchPlaceholder')}
             value={props.search}
             onInput={(e: Event) =>
               emit('updateSearch', (e.target as HTMLInputElement).value)
@@ -53,7 +49,7 @@ export default defineComponent({
         >
           {filters.map((f) => (
             <option key={f} value={f}>
-              {labels[f]}
+              {t(`drive.filter${f.charAt(0).toUpperCase() + f.slice(1)}`)}
             </option>
           ))}
         </select>

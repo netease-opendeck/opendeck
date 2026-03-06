@@ -1,4 +1,5 @@
 import { defineComponent, ref, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import {
   HardDrive,
   Calendar,
@@ -43,6 +44,8 @@ function getIcon(type: 'file' | 'link' | 'text') {
 export default defineComponent({
   name: 'DriveView',
   setup() {
+    const { t, locale } = useI18n();
+    const dateLocale = () => (locale.value === 'zh' ? 'zh-CN' : 'en-US');
     const search = ref('');
     const typeFilter = ref<'all' | 'file' | 'link' | 'text'>('all');
     const viewMode = ref<'time' | 'folder'>('time');
@@ -192,7 +195,7 @@ export default defineComponent({
                   </span>
                   <span class="text-[11px] text-slate-400 shrink-0">
                     {file.createdAt
-                      ? new Date(file.createdAt).toLocaleString('zh-CN', {
+                      ? new Date(file.createdAt).toLocaleString(dateLocale(), {
                           dateStyle: 'short',
                           timeStyle: 'short',
                         })
@@ -212,7 +215,7 @@ export default defineComponent({
           <div class="max-w-4xl mx-auto space-y-4">
             <div class="flex items-center justify-between gap-4 flex-wrap">
               <h2 class="text-2xl font-black text-slate-900 flex items-center gap-3">
-                <HardDrive class="text-indigo-600" /> 文件
+                <HardDrive class="text-indigo-600" /> {t('drive.title')}
               </h2>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -222,12 +225,12 @@ export default defineComponent({
                 </div>
                 <div class="min-w-0">
                   <p class="text-xs font-semibold text-indigo-600/90 uppercase tracking-wider">
-                    今日新增
+                    {t('drive.today')}
                   </p>
                   <p class="text-2xl font-black text-slate-900 tabular-nums mt-0.5">
                     {fileStats.value.today}
                     <span class="text-sm font-medium text-slate-500 ml-1">
-                      个
+                      {t('drive.unit')}
                     </span>
                   </p>
                 </div>
@@ -238,12 +241,12 @@ export default defineComponent({
                 </div>
                 <div class="min-w-0">
                   <p class="text-xs font-semibold text-violet-600/90 uppercase tracking-wider">
-                    本周新增
+                    {t('drive.thisWeek')}
                   </p>
                   <p class="text-2xl font-black text-slate-900 tabular-nums mt-0.5">
                     {fileStats.value.thisWeek}
                     <span class="text-sm font-medium text-slate-500 ml-1">
-                      个
+                      {t('drive.unit')}
                     </span>
                   </p>
                 </div>
@@ -254,12 +257,12 @@ export default defineComponent({
                 </div>
                 <div class="min-w-0">
                   <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                    全部文件
+                    {t('drive.allFiles')}
                   </p>
                   <p class="text-2xl font-black text-slate-900 tabular-nums mt-0.5">
                     {fileStats.value.total}
                     <span class="text-sm font-medium text-slate-500 ml-1">
-                      个
+                      {t('drive.unit')}
                     </span>
                   </p>
                 </div>
@@ -291,7 +294,7 @@ export default defineComponent({
                         : 'text-slate-500 hover:text-slate-700'
                     }`}
                   >
-                    最近
+                    {t('drive.viewRecent')}
                   </button>
                   <button
                     type="button"
@@ -304,7 +307,7 @@ export default defineComponent({
                         : 'text-slate-500 hover:text-slate-700'
                     }`}
                   >
-                    管理
+                    {t('drive.viewManage')}
                   </button>
                 </div>
               </div>
@@ -317,8 +320,8 @@ export default defineComponent({
             {!listLoading.value && !hasFiles.value ? (
               <div class="py-16 text-center text-slate-400 text-sm font-medium">
                 {search.value || typeFilter.value !== 'all'
-                  ? '没有匹配的文件'
-                  : '暂无文件，运行带有输出的技能后将产生文件'}
+                  ? t('drive.noMatch')
+                  : t('drive.empty')}
               </div>
             ) : viewMode.value === 'time' ? (
               <ul class="space-y-6">
@@ -327,13 +330,7 @@ export default defineComponent({
                   .map((key) => (
                     <li key={key}>
                       <h4 class="text-xs font-bold text-slate-400 mb-2">
-                        {key === 'today'
-                          ? '今天'
-                          : key === 'yesterday'
-                          ? '昨天'
-                          : key === 'thisWeek'
-                          ? '本周'
-                          : '更早'}
+                        {t(`common.${key}`)}
                       </h4>
                       <ul class="bg-white rounded-2xl border border-slate-200 overflow-hidden divide-y divide-slate-100">
                         {groupedByTime.value[key].map((file) => {
@@ -363,7 +360,7 @@ export default defineComponent({
                                   {file.createdAt
                                     ? new Date(
                                         file.createdAt,
-                                      ).toLocaleString('zh-CN', {
+                                      ).toLocaleString(dateLocale(), {
                                         dateStyle: 'short',
                                         timeStyle: 'short',
                                       })
@@ -381,7 +378,7 @@ export default defineComponent({
               <ul class="bg-white rounded-2xl border border-slate-200 overflow-hidden divide-y divide-slate-100">
                 {treeLoading.value || filteredFileTree.value.length === 0 ? (
                   <li class="py-8 text-center text-slate-400 text-sm">
-                    {treeLoading.value ? '文件树加载中...' : '暂无文件目录'}
+                    {treeLoading.value ? t('drive.treeLoading') : t('drive.noFolder')}
                   </li>
                 ) : (
                   filteredFileTree.value.map((node) => (
@@ -415,7 +412,7 @@ export default defineComponent({
                           {node.name || node.path}
                         </span>
                         <span class="text-[11px] text-slate-400 shrink-0">
-                          {node.files.length} 个文件
+                          {node.files.length} {t('drive.fileCount')}
                         </span>
                       </button>
                       {expandedFolderPaths.value.has(node.path) && (
@@ -430,17 +427,17 @@ export default defineComponent({
             )}
             {listLoading.value && (
               <div class="py-4 text-center text-slate-400 text-xs">
-                文件加载中...
+                {t('drive.listLoading')}
               </div>
             )}
             {statsError.value && (
               <div class="py-2 text-xs text-red-500">
-                文件统计获取失败：{statsError.value.message}
+                {t('drive.statsError')}：{statsError.value.message}
               </div>
             )}
             {listError.value && (
               <div class="py-2 text-xs text-red-500">
-                文件列表获取失败：{listError.value.message}
+                {t('drive.listError')}：{listError.value.message}
               </div>
             )}
           </div>

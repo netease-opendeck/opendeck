@@ -1,4 +1,5 @@
 import { defineComponent, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { X } from 'lucide-vue-next';
 import { fetchFileContent } from '@/composables/useFilesApi';
 import MarkdownView from '@/components/common/MarkdownView';
@@ -26,6 +27,7 @@ export default defineComponent({
     onClose: { type: Function as () => () => void, required: true },
   },
   setup(props) {
+    const { t } = useI18n();
     const loading = ref(false);
     const error = ref<FileApiError | null>(null);
     const content = ref('');
@@ -72,18 +74,18 @@ export default defineComponent({
                 type="button"
                 onClick={props.onClose}
                 class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-                aria-label="关闭"
+                aria-label={t('common.close')}
               >
                 <X size={18} />
               </button>
             </header>
             <div class="flex-1 overflow-y-auto custom-scrollbar p-5">
               {loading.value && (
-                <div class="text-sm text-slate-400">内容加载中...</div>
+                <div class="text-sm text-slate-400">{t('drive.contentLoading')}</div>
               )}
               {!loading.value && error.value && (
                 <div class="text-sm text-red-500">
-                  文件内容获取失败：{error.value.message}
+                  {t('drive.contentError')}：{error.value.message}
                 </div>
               )}
               {!loading.value && !error.value && (
@@ -98,7 +100,7 @@ export default defineComponent({
                   )}
                   {!textLike && (
                     <div class="text-sm text-slate-500">
-                      当前文件类型暂不支持在线预览，请在本地打开：
+                      {t('drive.previewUnsupported')}
                       <span class="block mt-1 break-all text-xs text-slate-400">
                         {props.file.filePath}
                       </span>

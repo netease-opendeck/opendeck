@@ -1,4 +1,5 @@
 import { defineComponent } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { X, File, CheckCircle2, AlertCircle } from 'lucide-vue-next';
 import type { TaskHistoryItem, TaskArtifact } from '@/types';
 
@@ -9,14 +10,17 @@ export default defineComponent({
     onClose: { type: Function as () => () => void, required: true },
   },
   setup(props) {
+    const { t, locale } = useI18n();
+    const dateLocale = () => (locale.value === 'zh' ? 'zh-CN' : 'en-US');
+
     const displayTitle = () =>
-      props.task.taskName ?? props.task.skillName ?? '未命名任务';
+      props.task.taskName ?? props.task.skillName ?? t('task.unnamed');
 
     const hasError = () => props.task.error !== null;
 
     const createdAtLabel = () => {
       if (!props.task.startedAt) return null;
-      return new Date(props.task.startedAt).toLocaleString('zh-CN', {
+      return new Date(props.task.startedAt).toLocaleString(dateLocale(), {
         dateStyle: 'short',
         timeStyle: 'short',
       });
@@ -24,7 +28,7 @@ export default defineComponent({
 
     const endedAtLabel = () => {
       if (!props.task.endedAt) return null;
-      return new Date(props.task.endedAt).toLocaleString('zh-CN', {
+      return new Date(props.task.endedAt).toLocaleString(dateLocale(), {
         dateStyle: 'short',
         timeStyle: 'short',
       });
@@ -36,7 +40,7 @@ export default defineComponent({
       const end = new Date(props.task.endedAt).getTime();
       if (Number.isNaN(start) || Number.isNaN(end) || end <= start) return null;
       const minutes = Math.floor((end - start) / 60000);
-      if (minutes < 60) return `${minutes} 分钟`;
+      if (minutes < 60) return `${minutes} ${t('task.minutes')}`;
       const hours = Math.floor(minutes / 60);
       const rest = minutes % 60;
       return `${hours}h ${rest}min`;
@@ -47,7 +51,7 @@ export default defineComponent({
         <div
           class="fixed right-0 top-0 bottom-0 z-40 w-[380px] border-l border-slate-200 bg-white flex flex-col overflow-hidden shadow-2xl"
           role="dialog"
-          aria-label="执行详情"
+          aria-label={t('task.executionDetail')}
         >
           <div class="p-4 border-b border-slate-100 flex-shrink-0">
             <div class="flex items-start justify-between gap-2">
@@ -63,7 +67,7 @@ export default defineComponent({
                         : 'bg-green-50 text-green-600'
                     }`}
                   >
-                    {hasError() ? '失败' : '已完成'}
+                    {hasError() ? t('task.failed') : t('task.completed')}
                   </span>
                 </div>
               </div>
@@ -71,24 +75,24 @@ export default defineComponent({
                 type="button"
                 onClick={props.onClose}
                 class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 shrink-0"
-                aria-label="关闭"
+                aria-label={t('task.close')}
               >
                 <X size={18} />
               </button>
             </div>
             <div class="flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-slate-500 pt-2 border-t border-slate-100 mt-3">
               {createdAtLabel() && (
-                <span>创建 {createdAtLabel()}</span>
+                <span>{t('task.created')} {createdAtLabel()}</span>
               )}
-              {endedAtLabel() && <span>结束 {endedAtLabel()}</span>}
-              {durationLabel() && <span>耗时 {durationLabel()}</span>}
+              {endedAtLabel() && <span>{t('task.ended')} {endedAtLabel()}</span>}
+              {durationLabel() && <span>{t('task.duration')} {durationLabel()}</span>}
             </div>
           </div>
           <div class="flex-1 overflow-y-auto min-h-0">
             {props.task.detail && (
               <section class="p-4 border-b border-slate-100">
                 <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
-                  详情
+                  {t('task.detail')}
                 </h4>
                 <p class="text-xs text-slate-600 leading-relaxed whitespace-pre-wrap">
                   {props.task.detail}
@@ -99,7 +103,7 @@ export default defineComponent({
             {props.task.artifacts && props.task.artifacts.length > 0 && (
               <section class="p-4 border-b border-slate-100">
                 <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
-                  文件
+                  {t('task.files')}
                 </h4>
                 <ul class="space-y-2">
                   {props.task.artifacts.map((art: TaskArtifact) => (
@@ -122,7 +126,7 @@ export default defineComponent({
                         </p>
                         {art.fileSize != null && (
                           <p class="text-[10px] text-slate-400 mt-0.5">
-                            大小：{art.fileSize} 字节
+                            {t('task.fileSize')}：{art.fileSize} {t('task.bytes')}
                           </p>
                         )}
                       </div>

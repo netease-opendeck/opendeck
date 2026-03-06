@@ -1,4 +1,5 @@
 import { defineComponent, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { X } from 'lucide-vue-next';
 
 export default defineComponent({
@@ -11,6 +12,7 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const { t } = useI18n();
     const name = ref('');
     const desc = ref('');
 
@@ -32,7 +34,7 @@ export default defineComponent({
           onClick={(e: Event) => e.stopPropagation()}
         >
           <header class="p-6 border-b border-slate-100 flex items-center justify-between">
-            <h2 class="text-lg font-black text-slate-900">创建新方案</h2>
+            <h2 class="text-lg font-black text-slate-900">{t('solutions.createTitle')}</h2>
             <button
               type="button"
               onClick={props.onClose}
@@ -47,7 +49,7 @@ export default defineComponent({
                 for="create-solution-name"
                 class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2"
               >
-                方案名称
+                {t('solutions.formName')}
               </label>
               <input
                 id="create-solution-name"
@@ -56,7 +58,7 @@ export default defineComponent({
                   name.value = (e.target as HTMLInputElement).value;
                 }}
                 type="text"
-                placeholder="例如：活动策划模板"
+                placeholder={t('solutions.formNamePlaceholder')}
                 class="w-full border border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
               />
             </div>
@@ -65,7 +67,7 @@ export default defineComponent({
                 for="create-solution-desc"
                 class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2"
               >
-                简要描述
+                {t('solutions.formDesc')}
               </label>
               <textarea
                 id="create-solution-desc"
@@ -73,7 +75,7 @@ export default defineComponent({
                 onInput={(e: Event) => {
                   desc.value = (e.target as HTMLTextAreaElement).value;
                 }}
-                placeholder="描述方案用途与适用场景"
+                placeholder={t('solutions.formDescPlaceholder')}
                 rows={3}
                 class="w-full border border-slate-200 rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 resize-none"
               />
@@ -84,14 +86,14 @@ export default defineComponent({
                 onClick={props.onClose}
                 class="flex-1 py-3 border border-slate-200 text-slate-600 rounded-xl font-bold"
               >
-                取消
+                {t('solutions.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={!name.value.trim()}
                 class="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold disabled:opacity-50"
               >
-                确定
+                {t('solutions.confirm')}
               </button>
             </div>
           </form>

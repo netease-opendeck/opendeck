@@ -1,4 +1,5 @@
 import { defineComponent } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { ChevronRight, Zap, X } from 'lucide-vue-next';
 import type { Solution, Expert, MySolutionItem, SkillDetail } from '@/types';
 import MarkdownView from '@/components/common/MarkdownView';
@@ -20,6 +21,7 @@ export default defineComponent({
     asModal: { type: Boolean, default: false },
   },
   setup(props) {
+    const { t } = useI18n();
     const isMine = () => !!props.myStats;
 
     const displayName = () =>
@@ -66,7 +68,7 @@ export default defineComponent({
                       : 'bg-slate-100 text-slate-500'
                   }`}
                 >
-                  {displayStatus() === 'enabled' ? '启用' : '禁用'}
+                  {displayStatus() === 'enabled' ? t('solutions.enabled') : t('solutions.disabled')}
                 </span>
               )}
             </div>
@@ -87,7 +89,7 @@ export default defineComponent({
               props.solution.skillDoc !== '' && (
                 <section class="space-y-3">
                   <h3 class="text-sm font-black uppercase tracking-[0.3em] text-slate-400">
-                    技能
+                    {t('solutions.title')}
                   </h3>
                   <div class="prose prose-slate max-w-none text-slate-600 text-sm leading-relaxed whitespace-pre-wrap">
                     {props.solution.skillDoc}
@@ -99,7 +101,7 @@ export default defineComponent({
               props.solution.doc !== '' && (
                 <section class="space-y-3">
                   <h3 class="text-sm font-black uppercase tracking-[0.3em] text-slate-400">
-                    技能
+                    {t('solutions.title')}
                   </h3>
                   <MarkdownView source={props.solution.doc} />
                 </section>
@@ -121,13 +123,13 @@ export default defineComponent({
             <div class="relative bg-white rounded-2xl shadow-2xl max-h-[90vh] w-full max-w-2xl flex flex-col overflow-hidden">
               <header class="flex items-center justify-between p-4 border-b border-slate-100 flex-shrink-0">
                 <h3 class="text-lg font-black text-slate-900 truncate">
-                  技能详情
+                  {t('solutions.skillDetail')}
                 </h3>
                 <button
                   type="button"
                   onClick={props.onBack}
                   class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-                  aria-label="关闭"
+                  aria-label={t('common.close')}
                 >
                   <X size={20} />
                 </button>
@@ -149,7 +151,7 @@ export default defineComponent({
               class="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-indigo-600 transition-all"
             >
               <ChevronRight size={18} class="rotate-180" />{' '}
-              {isMine() ? '返回我的技能' : '返回'}
+              {isMine() ? t('solutions.backMySkills') : t('solutions.back')}
             </button>
           </header>
           {content()}

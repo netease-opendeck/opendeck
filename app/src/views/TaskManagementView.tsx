@@ -1,6 +1,7 @@
 import { defineComponent, computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { ClipboardList, Calendar, Archive } from 'lucide-vue-next';
-import { getTimeGroupKey, TIME_GROUP_LABELS } from '@/utils/date';
+import { getTimeGroupKey } from '@/utils/date';
 import TaskGroupList from '@/components/tasks/TaskGroupList';
 import ExecutionDetailSidebar from '@/components/tasks/ExecutionDetailSidebar';
 import type {
@@ -13,6 +14,7 @@ import { fetchTasks, fetchTaskStats } from '@/composables/useTasksApi';
 export default defineComponent({
   name: 'TaskManagementView',
   setup() {
+    const { t, locale } = useI18n();
     const tasks = ref<TaskHistoryItem[]>([]);
     const stats = ref<TaskHistoryStats | null>(null);
     const loading = ref(false);
@@ -47,6 +49,7 @@ export default defineComponent({
     });
 
     const groupsForList = computed(() => {
+      void locale.value;
       const sorted = [...filteredTasks.value].sort((a, b) => {
         const ta = a.endedAt ?? a.startedAt ?? '';
         const tb = b.endedAt ?? b.startedAt ?? '';
@@ -69,7 +72,7 @@ export default defineComponent({
       return (['today', 'yesterday', 'thisWeek', 'earlier'] as const)
         .filter((key) => groups[key].length > 0)
         .map((key) => ({
-          timeLabel: TIME_GROUP_LABELS[key],
+          timeLabel: t(`common.${key}`),
           tasks: groups[key],
         }));
     });
@@ -110,7 +113,7 @@ export default defineComponent({
         <header class="p-6 md:p-8 bg-white border-b border-slate-200 flex-shrink-0">
           <div class="max-w-4xl mx-auto space-y-4">
             <h2 class="text-2xl font-black text-slate-900 flex items-center gap-3">
-              <ClipboardList class="text-indigo-600 size-5 opacity-90" /> 历史任务
+              <ClipboardList class="text-indigo-600 size-5 opacity-90" /> {t('task.title')}
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div class="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-br from-indigo-50 to-white border border-indigo-100/80 shadow-sm">
@@ -119,7 +122,7 @@ export default defineComponent({
                 </div>
                 <div class="min-w-0">
                   <p class="text-xs font-semibold text-indigo-600/90 uppercase tracking-wider">
-                    今日完成
+                    {t('task.today')}
                   </p>
                   <p class="text-2xl font-black text-slate-900 tabular-nums mt-0.5">
                     {taskStats.value.today}
@@ -132,7 +135,7 @@ export default defineComponent({
                 </div>
                 <div class="min-w-0">
                   <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                    本周完成
+                    {t('task.thisWeek')}
                   </p>
                   <p class="text-2xl font-black text-slate-900 tabular-nums mt-0.5">
                     {taskStats.value.thisWeek}
@@ -145,7 +148,7 @@ export default defineComponent({
                 </div>
                 <div class="min-w-0">
                   <p class="text-xs font-semibold text-amber-700/80 uppercase tracking-wider">
-                    累计完成
+                    {t('task.total')}
                   </p>
                   <p class="text-2xl font-black text-slate-900 tabular-nums mt-0.5">
                     {taskStats.value.total}
@@ -155,11 +158,11 @@ export default defineComponent({
             </div>
             {statsError.value && (
               <p class="text-[11px] text-amber-600 mt-2">
-                任务统计暂不可用：{statsError.value.message}
+                {t('task.statsError')}：{statsError.value.message}
               </p>
             )}
             <div class="flex flex-wrap items-center justify-end gap-3">
-              <span class="text-xs font-medium text-slate-500">时间筛选</span>
+              <span class="text-xs font-medium text-slate-500">{t('task.dateFilter')}</span>
               <input
                 type="date"
                 value={filterStart.value}
@@ -167,9 +170,9 @@ export default defineComponent({
                   filterStart.value = (e.target as HTMLInputElement).value;
                 }}
                 class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300"
-                title="开始日期"
+                title={t('task.startDate')}
               />
-              <span class="text-slate-400">至</span>
+              <span class="text-slate-400">{t('task.to')}</span>
               <input
                 type="date"
                 value={filterEnd.value}
@@ -177,7 +180,7 @@ export default defineComponent({
                   filterEnd.value = (e.target as HTMLInputElement).value;
                 }}
                 class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300"
-                title="结束日期"
+                title={t('task.endDate')}
               />
               {(filterStart.value || filterEnd.value) && (
                 <button
@@ -188,7 +191,7 @@ export default defineComponent({
                   }}
                   class="text-xs font-medium text-slate-500 hover:text-indigo-600"
                 >
-                  清除
+                  {t('task.clear')}
                 </button>
               )}
             </div>
@@ -198,19 +201,19 @@ export default defineComponent({
           <div class="max-w-4xl mx-auto">
             {loading.value ? (
               <div class="py-16 text-center text-slate-400 text-sm font-medium">
-                正在加载任务历史...
+                {t('task.loading')}
               </div>
             ) : error.value ? (
               <div class="py-16 text-center text-red-500 text-sm font-medium">
-                任务历史暂不可用：{error.value.message}
+                {t('task.error')}：{error.value.message}
               </div>
             ) : tasks.value.length === 0 ? (
               <div class="py-16 text-center text-slate-400 text-sm font-medium">
-                暂无已完成的任务，在工作台执行技能完成后会在此展示
+                {t('task.empty')}
               </div>
             ) : filteredTasks.value.length === 0 ? (
               <div class="py-12 text-center text-slate-400 text-sm">
-                未找到该时间范围内的任务
+                {t('task.noResults')}
               </div>
             ) : (
               <TaskGroupList

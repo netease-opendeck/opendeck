@@ -1,4 +1,5 @@
 import { defineComponent } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Package, ChevronRight } from 'lucide-vue-next';
 import type { Solution, MySolutionItem } from '@/types';
 
@@ -16,6 +17,7 @@ export default defineComponent({
     onCardClick: { type: Function as () => () => void, required: true },
   },
   setup(props) {
+    const { t } = useI18n();
     const title = () => props.mySolution?.name ?? props.solution?.title ?? '';
     const isMine = () => !!props.mySolution;
     const status = () => props.mySolution?.status;
@@ -37,7 +39,7 @@ export default defineComponent({
                   : 'bg-slate-100 text-slate-400'
               }`}
             >
-              {status() === 'enabled' ? '启用' : '禁用'}
+              {status() === 'enabled' ? t('solutions.enabled') : t('solutions.disabled')}
             </span>
           )}
         </div>
@@ -46,7 +48,7 @@ export default defineComponent({
         </h4>
         <p class="text-xs text-slate-500 mb-1.5 line-clamp-2">
           {props.mySolution
-            ? (props.mySolution.description ?? '我创建的技能，可在协作中使用。')
+            ? (props.mySolution.description ?? t('solutions.mySkillDescription'))
             : props.solution?.description}
         </p>
         <div class="flex items-center justify-end pt-1">

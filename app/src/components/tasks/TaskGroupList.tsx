@@ -1,4 +1,5 @@
 import { defineComponent } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { CheckCircle2, AlertCircle } from 'lucide-vue-next';
 import type { TaskHistoryItem } from '@/types';
 
@@ -17,6 +18,8 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const { t, locale } = useI18n();
+    const dateLocale = () => (locale.value === 'zh' ? 'zh-CN' : 'en-US');
     return () => (
       <ul class="space-y-8">
         {props.groups.map(({ timeLabel, tasks: groupTasks }) => (
@@ -37,13 +40,13 @@ export default defineComponent({
                     >
                       <div class="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
                         <p class="font-bold text-slate-900 truncate">
-                          {task.taskName ?? task.skillName ?? '未命名任务'}
+                          {task.taskName ?? task.skillName ?? t('task.unnamed')}
                         </p>
                       </div>
                       {timeLabelSource && (
                         <span class="text-[11px] text-slate-400 shrink-0 whitespace-nowrap">
-                          完成于{' '}
-                          {new Date(timeLabelSource).toLocaleString('zh-CN', {
+                          {t('task.completedAt')}{' '}
+                          {new Date(timeLabelSource).toLocaleString(dateLocale(), {
                             dateStyle: 'short',
                             timeStyle: 'short',
                           })}

@@ -1,4 +1,5 @@
 import { onMounted, defineComponent, ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Package, Search, CheckCircle, XCircle, Archive } from 'lucide-vue-next';
 import { fetchSkills } from '@/composables/useSkillsApi';
 import SolutionCard from '@/components/solutions/SolutionCard';
@@ -25,6 +26,7 @@ const DUMMY_EXPERT_FOR_MINE: Expert = {
 export default defineComponent({
   name: 'SolutionsView',
   setup() {
+    const { t } = useI18n();
     const experts: Expert[] = [DUMMY_EXPERT_FOR_MINE];
     const skills = ref<SkillListItem[]>([]);
     const search = ref('');
@@ -56,7 +58,7 @@ export default defineComponent({
         skills.value = [];
         showToast(
           loadError.value.message ||
-            '技能列表加载失败，请稍后重试。',
+            t('solutions.loadListError'),
           'error',
         );
       } finally {
@@ -77,8 +79,8 @@ export default defineComponent({
         detailError.value = error as SkillApiError;
         const message =
           detailError.value.type === 'not_found'
-            ? '技能不存在或已禁用。'
-            : '技能详情加载失败，请稍后重试。';
+            ? t('solutions.notFound')
+            : t('solutions.loadDetailError');
         showToast(message, 'error');
       } finally {
         detailLoading.value = false;
@@ -137,7 +139,7 @@ export default defineComponent({
           <header class="p-6 md:p-8 bg-white border-b border-slate-200 flex-shrink-0">
             <div class="max-w-4xl mx-auto space-y-4">
               <h2 class="text-2xl font-black text-slate-900 flex items-center gap-3">
-                <Package class="text-indigo-600 size-5 opacity-90" /> 技能
+                <Package class="text-indigo-600 size-5 opacity-90" /> {t('solutions.title')}
               </h2>
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div class="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-br from-indigo-50 to-white border border-indigo-100/80 shadow-sm">
@@ -146,7 +148,7 @@ export default defineComponent({
                   </div>
                   <div class="min-w-0">
                     <p class="text-xs font-semibold text-indigo-600/90 uppercase tracking-wider">
-                      全部技能
+                      {t('solutions.total')}
                     </p>
                     <p class="text-2xl font-black text-slate-900 tabular-nums mt-0.5">
                       {skillStats.value.total}
@@ -159,7 +161,7 @@ export default defineComponent({
                   </div>
                   <div class="min-w-0">
                     <p class="text-xs font-semibold text-emerald-600/90 uppercase tracking-wider">
-                      已启用
+                      {t('solutions.enabled')}
                     </p>
                     <p class="text-2xl font-black text-slate-900 tabular-nums mt-0.5">
                       {skillStats.value.enabled}
@@ -172,7 +174,7 @@ export default defineComponent({
                   </div>
                   <div class="min-w-0">
                     <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                      已禁用
+                      {t('solutions.disabled')}
                     </p>
                     <p class="text-2xl font-black text-slate-900 tabular-nums mt-0.5">
                       {skillStats.value.disabled}
@@ -188,7 +190,7 @@ export default defineComponent({
                   />
                   <input
                     type="text"
-                    placeholder="搜索技能名称或描述..."
+                    placeholder={t('solutions.searchPlaceholder')}
                     value={search.value}
                     onInput={(e: Event) => {
                       search.value = (e.target as HTMLInputElement).value;
@@ -217,29 +219,29 @@ export default defineComponent({
                       class="text-xs text-slate-400 hover:text-slate-600"
                       onClick={clearToast}
                     >
-                      关闭
+                      {t('solutions.close')}
                     </button>
                   </div>
                 </div>
               )}
               {loading.value && (
                 <div class="py-16 text-center text-slate-400 text-sm font-medium">
-                  技能加载中...
+                  {t('solutions.loading')}
                 </div>
               )}
               {!loading.value && loadError.value && (
                 <div class="py-16 text-center text-red-500 text-sm font-medium">
                   {loadError.value.type === 'unavailable' ||
                   loadError.value.type === 'network'
-                    ? '技能服务暂不可用，请稍后重试。'
-                    : '暂无可用技能。'}
+                    ? t('solutions.serviceError')
+                    : t('solutions.empty')}
                 </div>
               )}
               {!loading.value &&
                 !loadError.value &&
                 skills.value.length === 0 && (
                   <div class="py-16 text-center text-slate-400 text-sm font-medium">
-                    暂无可用技能。
+                    {t('solutions.empty')}
                   </div>
                 )}
               {!loading.value &&
@@ -247,7 +249,7 @@ export default defineComponent({
                 skills.value.length > 0 &&
                 filteredSkills.value.length === 0 && (
                   <div class="py-12 text-center text-slate-400 text-sm">
-                    未找到匹配的技能
+                    {t('solutions.noMatch')}
                   </div>
                 )}
               {!loading.value &&

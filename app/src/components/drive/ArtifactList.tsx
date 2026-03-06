@@ -1,4 +1,5 @@
 import { defineComponent } from 'vue';
+import { useI18n } from 'vue-i18n';
 import {
   FileText,
   File,
@@ -36,6 +37,7 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const { t } = useI18n();
     const getIcon = (type: Artifact['type']) => {
       if (type === 'file') return File;
       if (type === 'link') return ExternalLink;
@@ -48,10 +50,10 @@ export default defineComponent({
           <section>
             <h3 class="text-sm font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
               <FileText size={14} class="text-indigo-500" />
-              AI 每日总结
+              {t('artifact.dailySummary')}
             </h3>
             <p class="text-xs text-slate-400 mb-3">
-              用户与 AI 的对话结构化总结、任务执行洞察日报，由系统自动生成
+              {t('artifact.dailySummaryDesc')}
             </p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {props.dailySummary.artifacts.map((artifact) => {
@@ -74,8 +76,8 @@ export default defineComponent({
                       </p>
                       <p class="text-xs text-slate-500 mt-0.5">
                         {isChatSummary
-                          ? '用户与 AI 每日聊天的结构化总结'
-                          : 'AI 执行任务后的洞察与日报'}
+                          ? t('artifact.chatSummaryDesc')
+                          : t('artifact.taskInsightDesc')}
                       </p>
                     </div>
                     <ChevronRight
@@ -93,7 +95,7 @@ export default defineComponent({
           <section>
             <h3 class="text-sm font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
               <MessageSquare size={14} class="text-slate-400" />
-              会话与任务文件
+              {t('artifact.sessionAndTask')}
             </h3>
             <ul class="bg-white rounded-2xl border border-slate-200 overflow-hidden divide-y divide-slate-100">
               {props.flatSortedFiles.length > 0
@@ -165,7 +167,7 @@ export default defineComponent({
           props.flatSortedFiles.length === 0 &&
           props.otherFiles.length === 0 && (
             <div class="py-16 text-center text-slate-400 text-sm font-medium">
-              暂无附件，在对话中产生的文件会出现在这里
+              {t('artifact.noAttachments')}
             </div>
           )}
       </div>
