@@ -163,6 +163,12 @@ if (Test-Path $SKILLS_SRC) {
 $script:PKG | Set-Content (Join-Path $INSTALL_DIR ".deck_pkg") -Encoding utf8 -NoNewline
 
 # 更新 AGENTS.md
+$agentsConfigPath = Join-Path $PSScriptRoot "agents-config.json"
+if (-not (Test-Path $agentsConfigPath -PathType Leaf)) {
+    Write-Error "未找到 agents-config.json，请确保 scripts/agents-config.json 存在。"
+    exit 1
+}
+$agentsConfig = Get-Content -Path $agentsConfigPath -Raw -Encoding utf8 | ConvertFrom-Json
 $defaultOpenclaw = Join-Path $env:USERPROFILE ".openclaw"
 if ($Yes) {
     Write-Host "[AGENTS.md] 检测到 -Yes 模式，使用默认 .openclaw 路径: $defaultOpenclaw"
@@ -175,25 +181,17 @@ if (Test-Path $defaultOpenclaw -PathType Container) {
     $agentsFiles = Get-ChildItem -Path $defaultOpenclaw -Filter "AGENTS.md" -Recurse -File -ErrorAction SilentlyContinue
     if ($agentsFiles) {
         Write-Host "[AGENTS.md] 在 $defaultOpenclaw 下找到 $($agentsFiles.Count) 个 AGENTS.md，将逐一处理..."
-        $block = @"
-
-## Mandatory Workflow
-
-**Call skill-tracker on every conversation turn — NO EXCEPTIONS.**
-
-Before processing any user message and before sending any response, you MUST:
-
-1. **Self-check**: Ask yourself — "Have I executed skill-tracker for this conversation turn yet?"
-2. **If NO** → Stop everything. Follow skill-tracker instructions and append/update the tracking record in ``memory/skill-execution.jsonl`` BEFORE doing anything else.
-3. **If YES** → Proceed with the user's request.
-
-This is a hard gate, not a suggestion. Every conversation turn (every user message you respond to) must pass through skill-tracker first. If you catch yourself about to respond without having done it, STOP and do it. No excuses, no "I'll do it after," no skipping because the request seems simple.
-
-**Failure mode to watch for:** Getting excited about the user's request and jumping straight to it. The pattern is always: skill-tracker FIRST → then everything else.
-"@
+        $block = $agentsConfig.appendContent
         foreach ($f in $agentsFiles) {
             $content = Get-Content -Path $f.FullName -Raw -ErrorAction SilentlyContinue
-            if ($content -and $content -match "skill-tracker on every conversation turn") {
+            $alreadyHas = $false
+            foreach ($kw in $agentsConfig.duplicateKeywords) {
+                if ($content -and $content -match [regex]::Escape($kw)) {
+                    $alreadyHas = $true
+                    break
+                }
+            }
+            if ($alreadyHas) {
                 Write-Host "[AGENTS.md] 已包含 Mandatory Workflow，跳过: $($f.FullName)"
                 continue
             }

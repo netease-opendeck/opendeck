@@ -44,6 +44,27 @@ done
 
 # 更新 .openclaw 下的 AGENTS.md，追加 Mandatory Workflow 配置
 update_agents_md() {
+  local script_dir
+  script_dir="$(cd "$(dirname "$0")" && pwd)"
+  local config_path="$script_dir/agents-config.json"
+  if [ ! -f "$config_path" ]; then
+    echo "错误: 未找到 agents-config.json，请确保 scripts/agents-config.json 存在。" >&2
+    exit 1
+  fi
+
+  local content_file keywords_file
+  content_file="${TMPDIR:-/tmp}/agents-append-$$.txt"
+  keywords_file="${TMPDIR:-/tmp}/agents-keywords-$$.txt"
+  node -e "
+const fs = require('fs');
+const configPath = process.argv[1];
+const contentPath = process.argv[2];
+const keywordsPath = process.argv[3];
+const c = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+fs.writeFileSync(contentPath, c.appendContent);
+fs.writeFileSync(keywordsPath, c.duplicateKeywords.join('\n'));
+" "$config_path" "$content_file" "$keywords_file"
+
   local default_root="$HOME/.openclaw"
   local openclaw_root="$default_root"
 
@@ -60,6 +81,7 @@ update_agents_md() {
 
   if [ ! -d "$openclaw_root" ]; then
     echo "[AGENTS.md] 未找到目录: $openclaw_root，跳过写入"
+    rm -f "$content_file" "$keywords_file"
     return 0
   fi
 
@@ -67,43 +89,34 @@ update_agents_md() {
   count=$(find "$openclaw_root" -name "AGENTS.md" -type f 2>/dev/null | wc -l | tr -d ' ')
   if [ "$count" = "0" ]; then
     echo "[AGENTS.md] 未在 $openclaw_root 下找到 AGENTS.md，跳过写入"
+    rm -f "$content_file" "$keywords_file"
     return 0
   fi
 
   echo "[AGENTS.md] 在 $openclaw_root 下找到 $count 个 AGENTS.md，将逐一处理..."
 
   find "$openclaw_root" -name "AGENTS.md" -type f 2>/dev/null | while IFS= read -r file; do
-    if grep -q "skill-tracker on every conversation turn" "$file" 2>/dev/null; then
+    local already_has=0
+    while IFS= read -r kw; do
+      [ -z "$kw" ] && continue
+      if grep -q "$kw" "$file" 2>/dev/null; then
+        already_has=1
+        break
+      fi
+    done < "$keywords_file"
+    if [ "$already_has" = "1" ]; then
       echo "[AGENTS.md] 已包含 Mandatory Workflow，跳过: $file"
       continue
     fi
 
-    {
-      echo ""
-      cat <<'EOF'
-
-## Mandatory Workflow
-
-**Call skill-tracker on every conversation turn — NO EXCEPTIONS.**
-
-Before processing any user message and before sending any response, you MUST:
-
-1. **Self-check**: Ask yourself — "Have I executed skill-tracker for this conversation turn yet?"
-2. **If NO** → Stop everything. Follow skill-tracker instructions and append/update the tracking record in `memory/skill-execution.jsonl` BEFORE doing anything else.
-3. **If YES** → Proceed with the user's request.
-
-This is a hard gate, not a suggestion. Every conversation turn (every user message you respond to) must pass through skill-tracker first. If you catch yourself about to respond without having done it, STOP and do it. No excuses, no "I'll do it after," no skipping because the request seems simple.
-
-**Failure mode to watch for:** Getting excited about the user's request and jumping straight to it. The pattern is always: skill-tracker FIRST → then everything else.
-EOF
-    } >>"$file" 2>/dev/null
-
-    if [ $? -eq 0 ]; then
+    if cat "$content_file" >> "$file" 2>/dev/null; then
       echo "[AGENTS.md] 已向 $file 追加 Mandatory Workflow"
     else
       echo "[AGENTS.md] 无法写入 $file" >&2
     fi
   done
+
+  rm -f "$content_file" "$keywords_file"
 }
 
 # 1. 检测 openclaw
