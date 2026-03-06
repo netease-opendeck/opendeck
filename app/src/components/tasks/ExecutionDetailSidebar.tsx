@@ -102,29 +102,31 @@ export default defineComponent({
 
             {props.task.messages && props.task.messages.length > 0 && (
               <section class="p-4 border-b border-slate-100">
-                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
-                  {t('task.messages')}
-                </h4>
-                <ul class="space-y-3">
-                  {props.task.messages.map((msg, idx) => (
-                    <li key={idx} class="text-xs">
-                      <p class="font-medium text-slate-600 mb-0.5">
-                        {msg.role === 'user' ? t('task.user') : t('task.assistant')}：
-                      </p>
-                      <p class="text-slate-700 leading-relaxed whitespace-pre-wrap">
-                        {msg.content}
-                      </p>
-                      {msg.timestamp && (
-                        <p class="text-[10px] text-slate-400 mt-1">
-                          {new Date(msg.timestamp).toLocaleString(dateLocale(), {
-                            dateStyle: 'short',
-                            timeStyle: 'short',
-                          })}
+                <div class="rounded-xl bg-slate-50 border border-slate-100 p-4">
+                  <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-3">
+                    {t('task.messages')}
+                  </h4>
+                  <ul class="space-y-3">
+                    {props.task.messages.map((msg, idx) => (
+                      <li key={idx} class="text-xs">
+                        <p class="font-medium text-slate-600 mb-0.5">
+                          {msg.role === 'user' ? t('task.user') : t('task.assistant')}：
                         </p>
-                      )}
-                    </li>
-                  ))}
-                </ul>
+                        <p class="text-slate-700 leading-relaxed whitespace-pre-wrap">
+                          {msg.content}
+                        </p>
+                        {msg.timestamp && (
+                          <p class="text-[10px] text-slate-400 mt-1">
+                            {new Date(msg.timestamp).toLocaleString(dateLocale(), {
+                              dateStyle: 'short',
+                              timeStyle: 'short',
+                            })}
+                          </p>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </section>
             )}
 

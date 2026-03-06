@@ -2,6 +2,11 @@
 
 # DECK — OpenClaw 助手管理界面
 
+[![version](https://img.shields.io/badge/version-1.0.0-blue)](https://github.com/openclaw/open-deck)
+[![openclaw](https://img.shields.io/badge/openclaw-ready-brightgreen)](https://github.com/openclaw/openclaw)
+[![opendeck](https://img.shields.io/badge/opendeck-manage-orange)](https://github.com/openclaw/open-deck)
+[![manage](https://img.shields.io/badge/manage-dashboard-9cf)](https://github.com/openclaw/open-deck)
+
 **DECK** 是用于管理 [OpenClaw](https://github.com/openclaw/openclaw) 助手的 Web 界面。你可以在一个地方浏览技能、查看技能执行产生的文件，以及查看任务历史。
 
 若你已运行 OpenClaw 并希望有一个本地的技能、文件与任务管理面板，DECK 适合你。

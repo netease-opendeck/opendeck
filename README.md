@@ -2,6 +2,11 @@
 
 # DECK — Assistant Management UI for OpenClaw
 
+[![version](https://img.shields.io/badge/version-1.0.0-blue)](https://github.com/openclaw/open-deck)
+[![openclaw](https://img.shields.io/badge/openclaw-ready-brightgreen)](https://github.com/openclaw/openclaw)
+[![opendeck](https://img.shields.io/badge/opendeck-manage-orange)](https://github.com/openclaw/open-deck)
+[![manage](https://img.shields.io/badge/manage-dashboard-9cf)](https://github.com/openclaw/open-deck)
+
 **DECK** is a web UI for managing your [OpenClaw](https://github.com/openclaw/openclaw) assistant. It lets you browse skills, inspect files from skill execution records, and view task history—all from one place.
 
 If you run OpenClaw and want a local dashboard for skills, files, and tasks, DECK is for you.
