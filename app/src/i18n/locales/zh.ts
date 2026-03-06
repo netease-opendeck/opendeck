@@ -9,7 +9,7 @@ export default {
     en: 'English',
   },
   task: {
-    title: '历史任务',
+    title: '任务',
     today: '今日完成',
     thisWeek: '本周完成',
     total: '累计完成',

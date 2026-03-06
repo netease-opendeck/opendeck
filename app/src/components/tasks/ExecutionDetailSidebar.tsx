@@ -49,7 +49,7 @@ export default defineComponent({
     return () => {
       return (
         <div
-          class="fixed right-0 top-0 bottom-0 z-40 w-[380px] border-l border-slate-200 bg-white flex flex-col overflow-hidden shadow-2xl"
+          class="fixed right-0 top-0 bottom-0 z-40 w-[500px] border-l border-slate-200 bg-white flex flex-col overflow-hidden shadow-2xl"
           role="dialog"
           aria-label={t('task.executionDetail')}
         >

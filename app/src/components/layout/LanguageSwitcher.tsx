@@ -1,6 +1,5 @@
 import { defineComponent, ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { ChevronDown } from 'lucide-vue-next';
 import { setLocale } from '@/i18n';
 
 export default defineComponent({
@@ -32,24 +31,20 @@ export default defineComponent({
     });
 
     return () => (
-      <div class="language-switcher relative mb-4">
+      <div class="language-switcher relative mt-auto pt-4">
         <button
           type="button"
           onClick={toggle}
-          class="w-full flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-slate-300 hover:bg-white/5 hover:text-white transition-all text-sm font-medium"
+          class="w-full flex items-center justify-center py-2.5 px-3 rounded-xl text-slate-300 hover:bg-white/5 hover:text-white transition-all text-sm font-bold"
           aria-expanded={open.value}
           aria-haspopup="listbox"
           aria-label="Language"
         >
-          <span>{locale.value === 'zh' ? '中文' : 'English'}</span>
-          <ChevronDown
-            size={14}
-            class={`transition-transform ${open.value ? 'rotate-180' : ''}`}
-          />
+          {locale.value === 'zh' ? '中' : 'EN'}
         </button>
         {open.value && (
           <div
-            class="absolute left-0 right-0 top-full mt-1 py-1 bg-[#1f1f1f] border border-white/10 rounded-xl shadow-xl z-50"
+            class="absolute left-full top-0 ml-1 py-1 min-w-[100px] bg-[#1f1f1f] border border-white/10 rounded-xl shadow-xl z-50"
             role="listbox"
           >
             <button

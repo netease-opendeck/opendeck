@@ -9,7 +9,7 @@ export default {
     en: 'English',
   },
   task: {
-    title: 'Task History',
+    title: 'Tasks',
     today: 'Today',
     thisWeek: 'This Week',
     total: 'Total',

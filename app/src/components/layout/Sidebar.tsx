@@ -19,7 +19,6 @@ export default defineComponent({
     const { t } = useI18n();
     return () => (
       <div class="w-16 h-full bg-[#141414] text-white flex flex-col items-center py-6 flex-shrink-0 border-r border-white/5">
-        <LanguageSwitcher />
         <nav class="flex-1 flex flex-col gap-4">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -40,6 +39,7 @@ export default defineComponent({
             );
           })}
         </nav>
+        <LanguageSwitcher />
       </div>
     );
   },
