@@ -161,8 +161,8 @@ pm2 jlist 2>/dev/null | node -e "
 2. Read the backend `.env` file to detect the `PORT` (default `19520`).
 3. Get the public IP and try to access `http://<public_ip>:<port>/`. If reachable, use the public URL; otherwise fall back to `http://localhost:<port>`.
 4. Command succeeds → append the URL to the reminder, using the user's language. Examples:
-   - English user: `"📋 Task recorded — view details in Deck: [Deck](http://103.126.92.85:19520)"`
+   - English user: `"📋 Task recorded — view details in OpenDeck: [OpenDeck](http://103.126.92.85:19520)"`
 5. Command fails (process not found, not online, pm2 not installed, etc.) → skip the URL silently, using the user's language. Examples:
-   - English user: `"📋 Task recorded — check the Deck for details."`
+   - English user: `"📋 Task recorded — check the OpenDeck for details."`
 
 Do not expose internal JSON structure or file paths to the user.
