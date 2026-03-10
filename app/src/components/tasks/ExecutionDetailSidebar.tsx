@@ -1,6 +1,7 @@
-import { defineComponent } from 'vue';
+import { defineComponent, nextTick, onMounted, onUpdated, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { X, File, CheckCircle2, AlertCircle } from 'lucide-vue-next';
+import MarkdownView from '@/components/common/MarkdownView';
 import type { TaskHistoryItem, TaskArtifact } from '@/types';
 
 export default defineComponent({
@@ -11,6 +12,65 @@ export default defineComponent({
   },
   setup(props) {
     const { t, locale } = useI18n();
+    const messageMaxHeight = 80;
+    const messageBodyRefs = ref<Record<number, HTMLElement | null>>({});
+    const messageOverflowMap = ref<Record<number, boolean>>({});
+    const messageExpandedMap = ref<Record<number, boolean>>({});
+
+    const syncMessageOverflowState = () => {
+      const nextOverflowMap: Record<number, boolean> = {};
+      (props.task.messages ?? []).forEach((_, idx) => {
+        const el = messageBodyRefs.value[idx];
+        nextOverflowMap[idx] = !!el && el.scrollHeight > messageMaxHeight;
+      });
+
+      let overflowChanged =
+        Object.keys(nextOverflowMap).length !==
+        Object.keys(messageOverflowMap.value).length;
+      if (!overflowChanged) {
+        overflowChanged = Object.entries(nextOverflowMap).some(
+          ([key, value]) => messageOverflowMap.value[Number(key)] !== value,
+        );
+      }
+      if (overflowChanged) {
+        messageOverflowMap.value = nextOverflowMap;
+      }
+
+      let expandedChanged = false;
+      const nextExpandedMap = { ...messageExpandedMap.value };
+      Object.keys(nextExpandedMap).forEach((key) => {
+        const idx = Number(key);
+        if (!nextOverflowMap[idx]) {
+          delete nextExpandedMap[idx];
+          expandedChanged = true;
+        }
+      });
+      if (expandedChanged) {
+        messageExpandedMap.value = nextExpandedMap;
+      }
+    };
+
+    const scheduleSyncMessageOverflowState = () => {
+      void nextTick(() => {
+        syncMessageOverflowState();
+      });
+    };
+
+    const toggleMessageExpanded = (idx: number) => {
+      messageExpandedMap.value = {
+        ...messageExpandedMap.value,
+        [idx]: !messageExpandedMap.value[idx],
+      };
+    };
+
+    onMounted(() => {
+      scheduleSyncMessageOverflowState();
+    });
+
+    onUpdated(() => {
+      scheduleSyncMessageOverflowState();
+    });
+
     const dateLocale = () => (locale.value === 'zh' ? 'zh-CN' : 'en-US');
 
     const displayTitle = () =>
@@ -85,48 +145,60 @@ export default defineComponent({
             </div>
             <div class="flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-slate-500 pt-2 border-t border-slate-100 mt-3">
               {createdAtLabel() && (
-                <span>{t('task.created')} {createdAtLabel()}</span>
+                <span>
+                  {t('task.created')} {createdAtLabel()}
+                </span>
               )}
-              {endedAtLabel() && <span>{t('task.ended')} {endedAtLabel()}</span>}
-              {durationLabel() && <span>{t('task.duration')} {durationLabel()}</span>}
+              {endedAtLabel() && (
+                <span>
+                  {t('task.ended')} {endedAtLabel()}
+                </span>
+              )}
+              {durationLabel() && (
+                <span>
+                  {t('task.duration')} {durationLabel()}
+                </span>
+              )}
             </div>
           </div>
           <div class="flex-1 overflow-y-auto min-h-0">
-            {props.task.childrenTasks && props.task.childrenTasks.length > 0 && (
-              <section class="p-4 border-b border-slate-100">
-                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
-                  {t('task.steps')}
-                </h4>
-                <ul class="space-y-2">
-                  {props.task.childrenTasks.map((child) => {
-                    const isError = child.error !== null;
-                    const isCompleted = !isError && child.status === 'completed';
-                    const iconClass = isError
-                      ? 'text-red-500'
-                      : isCompleted
-                      ? 'text-green-500'
-                      : 'text-slate-400';
-                    return (
-                      <li
-                        key={child.id}
-                        class="flex items-center gap-2 text-xs text-slate-700"
-                      >
-                        <span class={`shrink-0 ${iconClass}`}>
-                          {isError ? (
-                            <AlertCircle size={14} />
-                          ) : (
-                            <CheckCircle2 size={14} />
-                          )}
-                        </span>
-                        <span class="truncate">
-                          {child.name || t('task.unnamed')}
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </section>
-            )}
+            {props.task.childrenTasks &&
+              props.task.childrenTasks.length > 0 && (
+                <section class="p-4 border-b border-slate-100">
+                  <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
+                    {t('task.steps')}
+                  </h4>
+                  <ul class="space-y-2">
+                    {props.task.childrenTasks.map((child) => {
+                      const isError = child.error !== null;
+                      const isCompleted =
+                        !isError && child.status === 'completed';
+                      const iconClass = isError
+                        ? 'text-red-500'
+                        : isCompleted
+                          ? 'text-green-500'
+                          : 'text-slate-400';
+                      return (
+                        <li
+                          key={child.id}
+                          class="flex items-center gap-2 text-xs text-slate-700"
+                        >
+                          <span class={`shrink-0 ${iconClass}`}>
+                            {isError ? (
+                              <AlertCircle size={14} />
+                            ) : (
+                              <CheckCircle2 size={14} />
+                            )}
+                          </span>
+                          <span class="truncate">
+                            {child.name || t('task.unnamed')}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+              )}
 
             {props.task.messages && props.task.messages.length > 0 && (
               <section class="p-4 border-b border-slate-100">
@@ -138,17 +210,51 @@ export default defineComponent({
                     {props.task.messages.map((msg, idx) => (
                       <li key={idx} class="text-xs">
                         <p class="font-medium text-slate-600 mb-0.5">
-                          {msg.role === 'user' ? t('task.user') : t('task.assistant')}：
+                          {msg.role === 'user'
+                            ? t('task.user')
+                            : t('task.assistant')}
+                          ：
                         </p>
-                        <p class="text-slate-700 leading-relaxed whitespace-pre-wrap">
-                          {msg.content}
-                        </p>
+                        <div class="relative">
+                          <div
+                            ref={(el) => {
+                              messageBodyRefs.value[idx] =
+                                (el as HTMLElement | null) ?? null;
+                            }}
+                            class={`text-slate-700 ${
+                              messageOverflowMap.value[idx] &&
+                              !messageExpandedMap.value[idx]
+                                ? 'max-h-[80px] overflow-hidden'
+                                : ''
+                            }`}
+                          >
+                            <MarkdownView source={msg.content} />
+                          </div>
+                          {messageOverflowMap.value[idx] &&
+                            !messageExpandedMap.value[idx] && (
+                              <div class="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-slate-50 to-transparent" />
+                            )}
+                        </div>
+                        {messageOverflowMap.value[idx] && (
+                          <button
+                            type="button"
+                            class="mt-1 text-[11px] font-medium text-blue-600 hover:text-blue-700"
+                            onClick={() => toggleMessageExpanded(idx)}
+                          >
+                            {messageExpandedMap.value[idx]
+                              ? t('task.collapse')
+                              : t('task.expand')}
+                          </button>
+                        )}
                         {msg.timestamp && (
                           <p class="text-[10px] text-slate-400 mt-1">
-                            {new Date(msg.timestamp).toLocaleString(dateLocale(), {
-                              dateStyle: 'short',
-                              timeStyle: 'short',
-                            })}
+                            {new Date(msg.timestamp).toLocaleString(
+                              dateLocale(),
+                              {
+                                dateStyle: 'short',
+                                timeStyle: 'short',
+                              },
+                            )}
                           </p>
                         )}
                       </li>
@@ -184,7 +290,8 @@ export default defineComponent({
                         </p>
                         {art.fileSize != null && (
                           <p class="text-[10px] text-slate-400 mt-0.5">
-                            {t('task.fileSize')}：{art.fileSize} {t('task.bytes')}
+                            {t('task.fileSize')}：{art.fileSize}{' '}
+                            {t('task.bytes')}
                           </p>
                         )}
                       </div>

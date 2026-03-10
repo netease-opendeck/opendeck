@@ -36,6 +36,8 @@ export default {
     messages: 'Conversation',
     user: 'User',
     assistant: 'Assistant',
+    expand: 'Expand',
+    collapse: 'Collapse',
     files: 'Files',
     fileSize: 'Size',
     bytes: 'bytes',

@@ -27,6 +27,8 @@ export interface MessageRecord {
 
 export interface ExecutionRecord {
   sessionId?: string;
+  sessionFile?: string;
+  startMessageId?: string;
   turnId?: string;
   turnName?: string;
   timestamp?: string;
