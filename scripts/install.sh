@@ -202,12 +202,23 @@ read_port_from_env() {
 }
 
 start_services() {
+  local port="$1"
   ensure_pm2
   ensure_build
   if [ ! -f "$INSTALL_DIR/ecosystem.config.cjs" ]; then
     echo "错误: 未找到 ecosystem.config.cjs，安装不完整。" >&2
     exit 1
   fi
+
+  local occupied_by
+  occupied_by="$(lsof -n -P -iTCP:"$port" -sTCP:LISTEN 2>/dev/null | awk 'NR>1 {print $1 " pid=" $2}' | tr '\n' ';')"
+  if [ -n "$occupied_by" ]; then
+    echo "错误: 端口 $port 已被占用，无法启动 OpenDeck。" >&2
+    echo "占用进程: $occupied_by" >&2
+    echo "请先释放该端口，或在 $INSTALL_DIR/backend/.env 设置其他 PORT 后重试。" >&2
+    exit 1
+  fi
+
   (cd "$INSTALL_DIR" && pm2 delete deck-backend >/dev/null 2>&1 || true)
   (cd "$INSTALL_DIR" && pm2 start ecosystem.config.cjs)
 }
@@ -217,13 +228,31 @@ wait_http_ready() {
   local url="http://localhost:$port"
   local i
   for i in $(seq 1 60); do
-    if node -e "const http=require('http');const req=http.get('$url',res=>{process.exit(res.statusCode===200?0:1)});req.on('error',()=>process.exit(1));req.setTimeout(1000,()=>{req.destroy();process.exit(1);});" >/dev/null 2>&1; then
-      return 0
+    if command -v curl >/dev/null 2>&1; then
+      if curl -fsS --max-time 1 "$url" >/dev/null 2>&1; then
+        return 0
+      fi
+    elif command -v python3 >/dev/null 2>&1; then
+      if python3 -c "import urllib.request,sys; urllib.request.urlopen('$url', timeout=1); sys.exit(0)" >/dev/null 2>&1; then
+        return 0
+      fi
+    else
+      # Fallback: if pm2 shows backend online and no HTTP client exists, avoid infinite wait.
+      if pm2 jlist 2>/dev/null | awk '/\"name\":\"deck-backend\"/{found=1} /\"status\":\"online\"/{online=1} END{exit !(found&&online)}'; then
+        return 0
+      fi
+    fi
+    if [ "$i" -eq 1 ] || [ $((i % 10)) -eq 0 ]; then
+      echo "等待服务就绪中... (${i}s/60s)"
     fi
     sleep 1
   done
   return 1
 }
+
+if ! command -v curl >/dev/null 2>&1 && ! command -v python3 >/dev/null 2>&1; then
+  echo "警告: 未检测到 curl/python3，将退化为 PM2 在线检查。" >&2
+fi
 
 if command -v openclaw >/dev/null 2>&1; then
   HAS_OPENCLAW=true
@@ -307,8 +336,8 @@ if [ "$HAS_OPENCLAW" = true ]; then
   openclaw gateway restart || true
 fi
 
-start_services
 PORT="$(read_port_from_env)"
+start_services "$PORT"
 if wait_http_ready "$PORT"; then
   echo ""
   echo "安装完成并已启动！"
