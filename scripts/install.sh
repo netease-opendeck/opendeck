@@ -344,9 +344,9 @@ if [ -d "$SKILLS_SRC" ]; then
   done
 fi
 update_agents_md
-if [ "$HAS_OPENCLAW" = true ]; then
-  openclaw gateway restart || true
-fi
+# if [ "$HAS_OPENCLAW" = true ]; then
+#   openclaw gateway restart || true
+# fi
 if wait_http_ready "$PORT"; then
   echo ""
   echo "安装完成并已启动！"
