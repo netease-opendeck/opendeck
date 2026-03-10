@@ -99,34 +99,7 @@ if (Test-Path $backendDir -PathType Container) {
     }
 }
 
-$SKILLS_SRC = Join-Path $INSTALL_DIR "skills"
-$INSTALLED_LIST = Join-Path $INSTALL_DIR ".installed_skills"
-"" | Set-Content $INSTALLED_LIST -Encoding utf8
-$SKILLS_TARGET | Set-Content (Join-Path $INSTALL_DIR ".skills_target") -Encoding utf8
-if (Test-Path $SKILLS_SRC) {
-    foreach ($skillDir in Get-ChildItem -Path $SKILLS_SRC -Directory) {
-        $target = Join-Path $SKILLS_TARGET $skillDir.Name
-        if (Test-Path $target) { Remove-Item -Path $target -Recurse -Force -ErrorAction SilentlyContinue }
-        Copy-Item -Path $skillDir.FullName -Destination $target -Recurse -Force
-        Add-Content -Path $INSTALLED_LIST -Value $skillDir.Name
-    }
-}
 $script:PKG | Set-Content (Join-Path $INSTALL_DIR ".deck_pkg") -Encoding utf8 -NoNewline
-
-$agentsConfigPath = Join-Path $PSScriptRoot "agents-config.json"
-if (Test-Path $agentsConfigPath -PathType Leaf) {
-    $agentsConfig = Get-Content -Path $agentsConfigPath -Raw -Encoding utf8 | ConvertFrom-Json
-    $openclawRoot = Resolve-OpenClawRoot
-    if (Test-Path $openclawRoot -PathType Container) {
-        $agentsFiles = Get-ChildItem -Path $openclawRoot -Filter "AGENTS.md" -Recurse -File -ErrorAction SilentlyContinue
-        foreach ($f in $agentsFiles) {
-            $content = Get-Content -Path $f.FullName -Raw -ErrorAction SilentlyContinue
-            $alreadyHas = $false
-            foreach ($kw in $agentsConfig.duplicateKeywords) { if ($content -and $content -match [regex]::Escape($kw)) { $alreadyHas = $true; break } }
-            if (-not $alreadyHas) { Add-Content -Path $f.FullName -Value $agentsConfig.appendContent -Encoding utf8 }
-        }
-    }
-}
 
 Ensure-Pm2
 Write-Host "正在安装依赖并构建 backend..."
@@ -144,6 +117,35 @@ Push-Location $INSTALL_DIR
 & pm2 delete deck-backend 2>$null
 & pm2 start ecosystem.config.cjs
 Pop-Location
+
+$SKILLS_SRC = Join-Path $INSTALL_DIR "skills"
+$INSTALLED_LIST = Join-Path $INSTALL_DIR ".installed_skills"
+"" | Set-Content $INSTALLED_LIST -Encoding utf8
+$SKILLS_TARGET | Set-Content (Join-Path $INSTALL_DIR ".skills_target") -Encoding utf8
+if (Test-Path $SKILLS_SRC) {
+    foreach ($skillDir in Get-ChildItem -Path $SKILLS_SRC -Directory) {
+        $target = Join-Path $SKILLS_TARGET $skillDir.Name
+        if (Test-Path $target) { Remove-Item -Path $target -Recurse -Force -ErrorAction SilentlyContinue }
+        Copy-Item -Path $skillDir.FullName -Destination $target -Recurse -Force
+        Add-Content -Path $INSTALLED_LIST -Value $skillDir.Name
+    }
+}
+
+$agentsConfigPath = Join-Path $PSScriptRoot "agents-config.json"
+if (Test-Path $agentsConfigPath -PathType Leaf) {
+    $agentsConfig = Get-Content -Path $agentsConfigPath -Raw -Encoding utf8 | ConvertFrom-Json
+    $openclawRoot = Resolve-OpenClawRoot
+    if (Test-Path $openclawRoot -PathType Container) {
+        $agentsFiles = Get-ChildItem -Path $openclawRoot -Filter "AGENTS.md" -Recurse -File -ErrorAction SilentlyContinue
+        foreach ($f in $agentsFiles) {
+            $content = Get-Content -Path $f.FullName -Raw -ErrorAction SilentlyContinue
+            $alreadyHas = $false
+            foreach ($kw in $agentsConfig.duplicateKeywords) { if ($content -and $content -match [regex]::Escape($kw)) { $alreadyHas = $true; break } }
+            if (-not $alreadyHas) { Add-Content -Path $f.FullName -Value $agentsConfig.appendContent -Encoding utf8 }
+        }
+    }
+}
+
 if ($script:HasOpenClaw) { try { & openclaw gateway restart } catch {} }
 
 $port = Read-PortFromEnv $backendEnv

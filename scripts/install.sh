@@ -315,6 +315,11 @@ cp "$REPO_ROOT/scripts/ecosystem.config.cjs" "$INSTALL_DIR/ecosystem.config.cjs"
 
 configure_backend_env
 
+echo "$PKG" > "$INSTALL_DIR/.deck_pkg"
+
+PORT="$(read_port_from_env)"
+start_services "$PORT"
+
 SKILLS_SRC="$INSTALL_DIR/skills"
 INSTALLED_LIST="$INSTALL_DIR/.installed_skills"
 : > "$INSTALLED_LIST"
@@ -329,12 +334,7 @@ if [ -d "$SKILLS_SRC" ]; then
     echo "$name" >> "$INSTALLED_LIST"
   done
 fi
-echo "$PKG" > "$INSTALL_DIR/.deck_pkg"
-
 update_agents_md
-
-PORT="$(read_port_from_env)"
-start_services "$PORT"
 if [ "$HAS_OPENCLAW" = true ]; then
   openclaw gateway restart || true
 fi
