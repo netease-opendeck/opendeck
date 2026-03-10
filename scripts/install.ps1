@@ -128,8 +128,6 @@ if (Test-Path $agentsConfigPath -PathType Leaf) {
     }
 }
 
-if ($script:HasOpenClaw) { try { & openclaw gateway restart } catch {} }
-
 Ensure-Pm2
 Write-Host "正在安装依赖并构建 backend..."
 Push-Location (Join-Path $INSTALL_DIR "backend")
@@ -146,6 +144,7 @@ Push-Location $INSTALL_DIR
 & pm2 delete deck-backend 2>$null
 & pm2 start ecosystem.config.cjs
 Pop-Location
+if ($script:HasOpenClaw) { try { & openclaw gateway restart } catch {} }
 
 $port = Read-PortFromEnv $backendEnv
 $ready = $false

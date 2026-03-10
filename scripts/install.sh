@@ -332,12 +332,12 @@ fi
 echo "$PKG" > "$INSTALL_DIR/.deck_pkg"
 
 update_agents_md
-if [ "$HAS_OPENCLAW" = true ]; then
-  openclaw gateway restart || true
-fi
 
 PORT="$(read_port_from_env)"
 start_services "$PORT"
+if [ "$HAS_OPENCLAW" = true ]; then
+  openclaw gateway restart || true
+fi
 if wait_http_ready "$PORT"; then
   echo ""
   echo "安装完成并已启动！"
