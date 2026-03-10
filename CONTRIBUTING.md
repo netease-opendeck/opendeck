@@ -8,7 +8,7 @@ Thank you for your interest in contributing to DECK.
 2. **Fork and clone** — Fork the repo and clone it locally.
 3. **Create a branch** — Use a descriptive branch name (e.g. `fix/install-script`, `docs/installation`).
 4. **Make changes** — Follow the existing code style (ESLint/Prettier in backend and app).
-5. **Test** — Run `pnpm install` and `pnpm run build` at the repo root. Manually test install with `./scripts/install.sh` if you changed scripts.
+5. **Test** — Run `pnpm install` and `pnpm run build` at the repo root. Manually test install with `./scripts/install.sh -y` if you changed scripts.
 6. **Submit a pull request** — Reference any related issue. Keep PRs focused and reasonably sized.
 
 ## Code style
@@ -23,4 +23,4 @@ Thank you for your interest in contributing to DECK.
 
 ## Release packaging
 
-`scripts/build-release.sh` is deprecated. OpenDeck now uses local-repository install flow (`./scripts/install.sh`) only.
+`scripts/build-release.sh` is deprecated. OpenDeck now uses local-repository install flow (`./scripts/install.sh -y`) only.

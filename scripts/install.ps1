@@ -11,6 +11,12 @@ $script:HasOpenClaw = $false
 $script:ResolvedOpenClawRoot = ""
 $script:PKG = ""
 
+# Default behavior: no-arg install is equivalent to -Yes.
+if ($PSBoundParameters.Count -eq 0 -and -not $Yes) {
+    $Yes = $true
+    Write-Host "未提供参数，默认启用非交互模式（等同 -Yes）。"
+}
+
 function Resolve-OpenClawRoot {
     if ($script:ResolvedOpenClawRoot) { return $script:ResolvedOpenClawRoot }
     $defaultRoot = Join-Path $env:USERPROFILE ".openclaw"
@@ -20,6 +26,8 @@ function Resolve-OpenClawRoot {
     }
     if ($Yes) {
         $script:ResolvedOpenClawRoot = $defaultRoot
+        Write-Warning "未检测到 $defaultRoot，已按默认值继续。"
+        Write-Host "建议显式指定安装目录后重试，例如: .\scripts\install.ps1 -Yes -Dir $env:USERPROFILE\deck -Skills $env:USERPROFILE\.openclaw\workspace\skills"
         return $script:ResolvedOpenClawRoot
     }
     $inputRoot = Read-Host "[openclaw-root] 未找到 $defaultRoot，请输入 OpenClaw 根目录（回车使用默认: $defaultRoot）"
