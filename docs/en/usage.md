@@ -11,7 +11,7 @@ DECK reads data from your OpenClaw installation. Configure the backend via envir
 | `OPENCLAW_SKILL_EXECUTION_PATH` | No | Relative path to execution log (default: `workspace/tracker-result/skill-execution.jsonl`) |
 | `PORT` | No | Backend port (default: 19520) |
 
-Copy `backend/.env.example` to `backend/.env` and set `OPENCLAW_ROOT` before running `deck start`.
+Copy `backend/.env.example` to `backend/.env` and set `OPENCLAW_ROOT` before running `./scripts/install.sh`.
 
 ## UI overview
 
@@ -37,4 +37,4 @@ Main endpoints:
 - **Backend fails to start** — Ensure `OPENCLAW_ROOT` is set and points to a valid OpenClaw root. Check `backend/.env`.
 - **Skills list empty** — Verify `OPENCLAW_SKILLS_PATH` and that the skills directory exists under `OPENCLAW_ROOT`.
 - **No tasks or files** — Execution data comes from `workspace/tracker-result/skill-execution.jsonl`. Ensure OpenClaw (and skill-tracker if used) writes to that path.
-- **deck command not found** — After install without sudo, run `source ~/.zshrc` (or your shell profile) or add the install directory to PATH manually.
+- **Service not ready after install** — Check PM2 logs with `pm2 logs deck-backend` and verify `backend/.env` values.

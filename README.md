@@ -107,8 +107,7 @@ cd opendeck
 ./scripts/install.sh
 ```
 
-Then run `deck start` from the install directory, or add it to PATH as the install script does.
-On first start, `deck` will automatically install dependencies and build the backend and frontend in the install directory (this may take a while).
+The install script will automatically install dependencies, build backend/frontend, and start the service (this may take a while).
 
 ## Required prompt in OpenClaw
 
@@ -146,16 +145,13 @@ Set the OpenClaw root in the backend (in the install directory, or when running 
 
 Optional: `OPENCLAW_SKILLS_PATH`, `OPENCLAW_SKILL_EXECUTION_PATH`, `PORT`. See [backend README](backend/README.md).
 
-## Management commands
+## Uninstall
 
-| Command       | Description                          |
-|---------------|--------------------------------------|
-| `deck start`  | Start backend (serves frontend)      |
-| `deck stop`   | Stop backend                         |
-| `deck restart`| Restart backend                      |
-| `deck status` | Show PM2 status                      |
-| `deck help`   | Show help                            |
-| `deck remove` | Stop, remove install dir and skills  |
+Use the uninstall script to remove OpenDeck runtime and installed skills:
+
+```bash
+./scripts/uninstall.sh
+```
 
 ## Docs
 
