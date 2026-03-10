@@ -104,7 +104,7 @@ Visit https://github.com/netease-opendeck/opendeck to download and install OpenD
 git clone https://github.com/netease-opendeck/opendeck.git
 cd opendeck
 
-./scripts/install.sh
+./scripts/install.sh -y
 ```
 
 The install script will automatically install dependencies, build backend/frontend, and start the service (this may take a while).

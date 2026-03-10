@@ -94,7 +94,7 @@ Boss需要管理看板。
 git clone https://github.com/netease-opendeck/opendeck.git
 cd opendeck
 
-./scripts/install.sh
+./scripts/install.sh -y
 ```
 
 安装脚本会自动完成依赖安装、构建并启动服务（首次启动时间会稍长）。

@@ -11,7 +11,7 @@ DECK reads data from your OpenClaw installation. Configure the backend via envir
 | `OPENCLAW_SKILL_EXECUTION_PATH` | No | Relative path to execution log (default: `workspace/tracker-result/skill-execution.jsonl`) |
 | `PORT` | No | Backend port (default: 19520) |
 
-Copy `backend/.env.example` to `backend/.env` and set `OPENCLAW_ROOT` before running `./scripts/install.sh`.
+Copy `backend/.env.example` to `backend/.env` and set `OPENCLAW_ROOT` before running `./scripts/install.sh -y`.
 
 ## UI overview
 

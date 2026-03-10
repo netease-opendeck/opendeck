@@ -13,7 +13,7 @@ DECK 是用于管理 OpenClaw 的助手服务，包含 backend（NestJS）和 fr
 
 ```bash
 cd open-deck
-./scripts/install.sh
+./scripts/install.sh -y
 ```
 
 安装脚本会自动安装依赖、构建前后端并直接启动服务（取决于网络与机器性能，可能需要数十秒）。
@@ -29,7 +29,7 @@ cd open-deck
 示例：
 
 ```bash
-./scripts/install.sh -d ~/my-deck -s ~/.openclaw/workspace/skills
+./scripts/install.sh -y -d ~/my-deck -s ~/.openclaw/workspace/skills
 ```
 
 ## 卸载

@@ -13,7 +13,7 @@ DECK is an assistant management service for OpenClaw, with a NestJS backend and 
 
 ```bash
 cd open-deck
-./scripts/install.sh
+./scripts/install.sh -y
 ```
 
 The install script automatically installs dependencies, builds backend/frontend, and starts the service. This may take some time depending on your network and machine.
@@ -29,7 +29,7 @@ The install script automatically installs dependencies, builds backend/frontend,
 Example:
 
 ```bash
-./scripts/install.sh -d ~/my-deck -s ~/.openclaw/workspace/skills
+./scripts/install.sh -y -d ~/my-deck -s ~/.openclaw/workspace/skills
 ```
 
 ## Uninstall

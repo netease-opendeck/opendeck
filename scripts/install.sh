@@ -9,6 +9,7 @@ YES_MODE=false
 OPENCLAW_ROOT_INPUT=""
 HAS_OPENCLAW=false
 PKG=""
+RAW_ARG_COUNT=$#
 
 usage() {
   cat <<'EOF'
@@ -35,6 +36,12 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Default behavior: no-arg install is equivalent to -y.
+if [ "$RAW_ARG_COUNT" -eq 0 ]; then
+  YES_MODE=true
+  echo "未提供参数，默认启用非交互模式（等同 -y）。"
+fi
+
 resolve_openclaw_root() {
   local default_root="$HOME/.openclaw"
   if [ -n "$OPENCLAW_ROOT_INPUT" ]; then
@@ -46,6 +53,8 @@ resolve_openclaw_root() {
   fi
   if [ "$YES_MODE" = true ]; then
     OPENCLAW_ROOT_INPUT="$default_root"
+    echo "警告: 未检测到 $default_root，已按默认值继续。"
+    echo "建议显式指定安装目录后重试，例如: ./scripts/install.sh -y -d \"$HOME/deck\" -s \"$HOME/.openclaw/workspace/skills\""
     return 0
   fi
   printf "[openclaw-root] 未找到 %s，请输入 OpenClaw 根目录（回车使用默认: %s）: " "$default_root" "$default_root"
