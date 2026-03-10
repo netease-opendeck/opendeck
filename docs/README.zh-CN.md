@@ -82,7 +82,7 @@ Boss需要管理看板。
 ### 前置条件
 
 - 已安装并配置 [OpenClaw](https://docs.openclaw.ai/)
-- Node.js ≥18，以及 pnpm 或 npm（Linux/macOS 一键安装需 curl）
+- Node.js ≥18，以及 pnpm 或 npm
 
 ### 方式一
 你可以将以下提示词发送给你的 OpenClaw，即可自动完成安装与启动。
@@ -94,7 +94,7 @@ Boss需要管理看板。
 git clone https://github.com/netease-opendeck/opendeck.git
 cd opendeck
 
-./scripts/install.sh --from-local
+./scripts/install.sh
 ```
 
 然后从安装目录执行 `deck start`，或按安装脚本提示将安装目录加入 PATH。

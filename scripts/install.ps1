@@ -1,16 +1,16 @@
 # deck 安装脚本 (Windows PowerShell)
-# 用法: .\scripts\install.ps1 -FromLocal
+# 用法: .\scripts\install.ps1
 #   或: .\scripts\install.ps1 -Dir C:\deck -Yes
 
 param(
     [string]$Dir = "",
     [string]$Skills = "",
-    [switch]$Yes = $false,
-    [switch]$FromLocal = $false
+    [switch]$Yes = $false
 )
 
 $ErrorActionPreference = "Stop"
-$DEFAULT_RELEASE_URL = if ($env:DECK_RELEASE_URL) { $env:DECK_RELEASE_URL } else { "https://github.com/example/deck/releases/latest/download/deck.tar.gz" }
+$script:HasOpenClaw = $false
+$script:ResolvedOpenClawRoot = ""
 
 function Write-Usage {
     @"
@@ -22,10 +22,36 @@ deck 安装脚本 (Windows)
 选项:
   -Dir PATH      安装目录（默认: $env:USERPROFILE\deck）
   -Skills PATH   skills 安装路径（默认: $env:USERPROFILE\.openclaw\workspace\skills）
-  -Yes           非交互模式，已存在的 skill 不覆盖
-  -FromLocal     从当前目录复制（用于 git clone 后的本地安装）
+  -Yes           非交互模式，使用默认路径并自动覆盖同名 skill
   -Help          显示此帮助
 "@
+}
+
+function Resolve-OpenClawRoot {
+    if ($script:ResolvedOpenClawRoot) {
+        return $script:ResolvedOpenClawRoot
+    }
+
+    $defaultRoot = Join-Path $env:USERPROFILE ".openclaw"
+    if (Test-Path $defaultRoot -PathType Container) {
+        Write-Host "[openclaw-root] 检测到默认目录: $defaultRoot"
+        $script:ResolvedOpenClawRoot = $defaultRoot
+        return $script:ResolvedOpenClawRoot
+    }
+
+    if ($Yes) {
+        Write-Host "[openclaw-root] 未检测到默认目录，-Yes 模式使用默认值: $defaultRoot"
+        $script:ResolvedOpenClawRoot = $defaultRoot
+        return $script:ResolvedOpenClawRoot
+    }
+
+    $inputRoot = Read-Host "[openclaw-root] 未找到 $defaultRoot，请输入 OpenClaw 根目录（回车使用默认: $defaultRoot）"
+    if ($inputRoot) {
+        $script:ResolvedOpenClawRoot = $inputRoot
+    } else {
+        $script:ResolvedOpenClawRoot = $defaultRoot
+    }
+    return $script:ResolvedOpenClawRoot
 }
 
 if ($args -contains "-Help" -or $args -contains "-h") {
@@ -34,8 +60,10 @@ if ($args -contains "-Help" -or $args -contains "-h") {
 }
 
 # 检测 openclaw
-if (-not (Get-Command openclaw -ErrorAction SilentlyContinue)) {
-    Write-Error "未检测到 openclaw。deck 用于管理 openclaw，请先安装 openclaw。"
+if (Get-Command openclaw -ErrorAction SilentlyContinue) {
+    $script:HasOpenClaw = $true
+} else {
+    Write-Warning "未检测到 openclaw，将继续安装，但会跳过 gateway 重启。"
 }
 
 # 检测 node
@@ -69,82 +97,31 @@ if (-not $Skills) {
 $SKILLS_TARGET = $Skills
 New-Item -ItemType Directory -Force -Path $SKILLS_TARGET | Out-Null
 
-# 下载或本地复制
-if ($FromLocal) {
-    $REPO_ROOT = Resolve-Path (Join-Path $PSScriptRoot "..")
-    if (-not (Test-Path (Join-Path $REPO_ROOT "backend\package.json")) -or -not (Test-Path (Join-Path $REPO_ROOT "app\package.json"))) {
-        Write-Error "--FromLocal 需在仓库根目录或 scripts 目录下执行"
-    }
-    Write-Host "从本地复制到 $INSTALL_DIR ..."
-    New-Item -ItemType Directory -Force -Path $INSTALL_DIR | Out-Null
-    Copy-Item -Path (Join-Path $REPO_ROOT "backend") -Destination $INSTALL_DIR -Recurse -Force
-    Copy-Item -Path (Join-Path $REPO_ROOT "app") -Destination $INSTALL_DIR -Recurse -Force
-    if (Test-Path (Join-Path $REPO_ROOT "skills")) {
-        Copy-Item -Path (Join-Path $REPO_ROOT "skills") -Destination $INSTALL_DIR -Recurse -Force
-    } else {
-        New-Item -ItemType Directory -Force -Path (Join-Path $INSTALL_DIR "skills") | Out-Null
-    }
-    Copy-Item -Path (Join-Path $REPO_ROOT "scripts\deck.ps1") -Destination $INSTALL_DIR -Force
-    Copy-Item -Path (Join-Path $REPO_ROOT "scripts\deck.cmd") -Destination $INSTALL_DIR -Force
-    Copy-Item -Path (Join-Path $REPO_ROOT "scripts\ecosystem.config.cjs") -Destination $INSTALL_DIR -Force
-} else {
-    if (-not (Get-Command curl -ErrorAction SilentlyContinue) -and -not (Get-Command Invoke-WebRequest -ErrorAction SilentlyContinue)) {
-        Write-Error "下载需要 curl 或 PowerShell 网络支持。"
-    }
-    Write-Host "正在下载 deck..."
-    $TMP_DIR = Join-Path $env:TEMP "deck-install-$(Get-Random)"
-    New-Item -ItemType Directory -Force -Path $TMP_DIR | Out-Null
-    try {
-        Invoke-WebRequest -Uri $DEFAULT_RELEASE_URL -OutFile (Join-Path $TMP_DIR "deck.tar.gz") -UseBasicParsing
-        $tar = Get-Command tar -ErrorAction SilentlyContinue
-        if ($tar) {
-            Push-Location $TMP_DIR
-            & tar -xzf deck.tar.gz
-            Pop-Location
-        } else {
-            Write-Error "解压需要 tar。请使用 -FromLocal 从本地安装，或安装 tar (如 Git for Windows)。"
-        }
-        $SRC_ROOT = $TMP_DIR
-        foreach ($d in Get-ChildItem -Path $TMP_DIR -Directory) {
-            if ((Test-Path (Join-Path $d.FullName "backend\package.json")) -and (Test-Path (Join-Path $d.FullName "app\package.json"))) {
-                $SRC_ROOT = $d.FullName
-                break
-            }
-        }
-        New-Item -ItemType Directory -Force -Path $INSTALL_DIR | Out-Null
-        Copy-Item -Path (Join-Path $SRC_ROOT "backend") -Destination $INSTALL_DIR -Recurse -Force
-        Copy-Item -Path (Join-Path $SRC_ROOT "app") -Destination $INSTALL_DIR -Recurse -Force
-        if (Test-Path (Join-Path $SRC_ROOT "skills")) {
-            Copy-Item -Path (Join-Path $SRC_ROOT "skills") -Destination $INSTALL_DIR -Recurse -Force
-        } else {
-            New-Item -ItemType Directory -Force -Path (Join-Path $INSTALL_DIR "skills") | Out-Null
-        }
-        if (Test-Path (Join-Path $SRC_ROOT "scripts\deck.ps1")) {
-            Copy-Item -Path (Join-Path $SRC_ROOT "scripts\deck.ps1") -Destination $INSTALL_DIR -Force
-            Copy-Item -Path (Join-Path $SRC_ROOT "scripts\deck.cmd") -Destination $INSTALL_DIR -Force
-        }
-        Copy-Item -Path (Join-Path $SRC_ROOT "ecosystem.config.cjs") -Destination $INSTALL_DIR -Force -ErrorAction SilentlyContinue
-        if (-not (Test-Path (Join-Path $INSTALL_DIR "ecosystem.config.cjs"))) {
-            Copy-Item -Path (Join-Path $SRC_ROOT "scripts\ecosystem.config.cjs") -Destination $INSTALL_DIR -Force
-        }
-    } finally {
-        Remove-Item -Path $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
-    }
+# 仅本地仓库复制
+$REPO_ROOT = Resolve-Path (Join-Path $PSScriptRoot "..")
+if (-not (Test-Path (Join-Path $REPO_ROOT "backend\package.json")) -or -not (Test-Path (Join-Path $REPO_ROOT "app\package.json"))) {
+    Write-Error "本地安装模式下必须在 open-deck 仓库内执行脚本。"
 }
+Write-Host "从本地复制到 $INSTALL_DIR ..."
+New-Item -ItemType Directory -Force -Path $INSTALL_DIR | Out-Null
+Remove-Item -Path (Join-Path $INSTALL_DIR "backend"), (Join-Path $INSTALL_DIR "app"), (Join-Path $INSTALL_DIR "skills"), (Join-Path $INSTALL_DIR "deck.ps1"), (Join-Path $INSTALL_DIR "deck.cmd"), (Join-Path $INSTALL_DIR "ecosystem.config.cjs") -Recurse -Force -ErrorAction SilentlyContinue
+Copy-Item -Path (Join-Path $REPO_ROOT "backend") -Destination $INSTALL_DIR -Recurse -Force
+Copy-Item -Path (Join-Path $REPO_ROOT "app") -Destination $INSTALL_DIR -Recurse -Force
+if (Test-Path (Join-Path $REPO_ROOT "skills")) {
+    Copy-Item -Path (Join-Path $REPO_ROOT "skills") -Destination $INSTALL_DIR -Recurse -Force
+} else {
+    New-Item -ItemType Directory -Force -Path (Join-Path $INSTALL_DIR "skills") | Out-Null
+}
+Copy-Item -Path (Join-Path $REPO_ROOT "scripts\deck.ps1") -Destination $INSTALL_DIR -Force
+Copy-Item -Path (Join-Path $REPO_ROOT "scripts\deck.cmd") -Destination $INSTALL_DIR -Force
+Copy-Item -Path (Join-Path $REPO_ROOT "scripts\ecosystem.config.cjs") -Destination $INSTALL_DIR -Force
 
 # 配置 backend\.env 中的 OPENCLAW_ROOT
 $backendDir = Join-Path $INSTALL_DIR "backend"
 $backendEnv = Join-Path $backendDir ".env"
 $backendExample = Join-Path $backendDir ".env.example"
 if (Test-Path $backendDir -PathType Container) {
-    $defaultRoot = Join-Path $env:USERPROFILE ".openclaw"
-    $openclawRoot = $defaultRoot
-    if ($Yes) {
-        Write-Host "[backend/.env] 检测到 -Yes 模式，使用默认 OPENCLAW_ROOT: $defaultRoot"
-    } else {
-        $inputRoot = Read-Host "[backend/.env] 请输入 OpenClaw 根目录 OPENCLAW_ROOT（回车使用默认: $defaultRoot）"
-        if ($inputRoot) { $openclawRoot = $inputRoot }
-    }
+    $openclawRoot = Resolve-OpenClawRoot
 
     if (-not (Test-Path $backendEnv -PathType Leaf)) {
         if (Test-Path $backendExample -PathType Leaf) {
@@ -174,15 +151,7 @@ if (Test-Path $SKILLS_SRC) {
         $name = $skillDir.Name
         $target = Join-Path $SKILLS_TARGET $name
         if (Test-Path $target) {
-            if ($Yes) {
-                Write-Host "跳过已存在的 skill: $name"
-                continue
-            }
-            $reply = Read-Host "目标路径已存在 skill `"$name`"，是否覆盖？[y/N]"
-            if ($reply -notmatch '^[yY]') {
-                Write-Host "跳过 $name"
-                continue
-            }
+            Remove-Item -Path $target -Recurse -Force -ErrorAction SilentlyContinue
         }
         Copy-Item -Path $skillDir.FullName -Destination $target -Recurse -Force
         Add-Content -Path $INSTALLED_LIST -Value $name
@@ -200,14 +169,7 @@ if (-not (Test-Path $agentsConfigPath -PathType Leaf)) {
     exit 1
 }
 $agentsConfig = Get-Content -Path $agentsConfigPath -Raw -Encoding utf8 | ConvertFrom-Json
-$defaultOpenclaw = Join-Path $env:USERPROFILE ".openclaw"
-if ($Yes) {
-    Write-Host "[AGENTS.md] 检测到 -Yes 模式，使用默认 .openclaw 路径: $defaultOpenclaw"
-} else {
-    Write-Host "[AGENTS.md] 将在重启 openclaw gateway 之前更新 Mandatory Workflow 配置。"
-    $inputRoot = Read-Host "[AGENTS.md] 请输入 .openclaw 路径（回车使用默认: $defaultOpenclaw）"
-    if ($inputRoot) { $defaultOpenclaw = $inputRoot }
-}
+$defaultOpenclaw = Resolve-OpenClawRoot
 if (Test-Path $defaultOpenclaw -PathType Container) {
     $agentsFiles = Get-ChildItem -Path $defaultOpenclaw -Filter "AGENTS.md" -Recurse -File -ErrorAction SilentlyContinue
     if ($agentsFiles) {
@@ -241,11 +203,15 @@ if (Test-Path $defaultOpenclaw -PathType Container) {
 }
 
 # 重启 openclaw
-Write-Host "正在重启 openclaw gateway..."
-try {
-    & openclaw gateway restart
-} catch {
-    # 忽略失败
+if ($script:HasOpenClaw) {
+    Write-Host "正在重启 openclaw gateway..."
+    try {
+        & openclaw gateway restart
+    } catch {
+        # 忽略失败
+    }
+} else {
+    Write-Warning "未检测到 openclaw，跳过 gateway 重启。"
 }
 
 # 将 deck 加入用户 PATH
