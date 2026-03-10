@@ -84,7 +84,7 @@ description: OpenDeck 对话式安装 Skill（中文主导 + English hints），
 ```bash
 git clone https://github.com/netease-opendeck/opendeck.git
 cd opendeck
-./scripts/install.sh --from-local
+./scripts/install.sh
 deck start
 ```
 

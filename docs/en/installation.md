@@ -5,29 +5,15 @@ DECK is an assistant management service for OpenClaw, with a NestJS backend and 
 ## Prerequisites
 
 - [OpenClaw](https://docs.openclaw.ai/) installed
-- Node.js, pnpm or npm (curl required for one-line install on Linux/macOS)
+- Node.js, pnpm or npm
 
 ## Install
 
-### Option 1: One-line install
-
-Replace `YOUR_ORG` with your GitHub org or username:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_ORG/open-deck/main/scripts/install.sh | bash
-```
-
-Or specify a release tarball URL:
-
-```bash
-DECK_RELEASE_URL=https://github.com/YOUR_ORG/open-deck/releases/latest/download/deck.tar.gz curl -fsSL https://raw.githubusercontent.com/YOUR_ORG/open-deck/main/scripts/install.sh | bash
-```
-
-### Option 2: From source (after git clone)
+### Local install (after git clone)
 
 ```bash
 cd open-deck
-./scripts/install.sh --from-local
+./scripts/install.sh
 ```
 
 On first `deck start`, DECK will automatically install dependencies and build both backend and frontend inside the install directory. This may take some time depending on your network and machine.
@@ -36,15 +22,14 @@ On first `deck start`, DECK will automatically install dependencies and build bo
 
 | Option | Description |
 |--------|-------------|
-| `-d, --dir PATH` | Install directory (default: `/opt/deck` with sudo, else `~/deck`) |
+| `-d, --dir PATH` | Install directory (default: `~/deck`) |
 | `-s, --skills PATH` | Skills target path (default: `~/.openclaw/workspace/skills/`) |
-| `-y, --yes` | Non-interactive; skip overwriting existing skills |
-| `--from-local` | Copy from current directory (for local install after clone) |
+| `-y, --yes` | Non-interactive; use defaults and overwrite existing skills |
 
 Example:
 
 ```bash
-./scripts/install.sh --from-local -d ~/my-deck -s ~/.openclaw/workspace/skills
+./scripts/install.sh -d ~/my-deck -s ~/.openclaw/workspace/skills
 ```
 
 ## Environment
@@ -85,7 +70,7 @@ The install script prefers **pnpm**; if not found, it uses **npm**. The choice i
 Use `-y` (or `--yes`) for non-interactive install:
 
 ```bash
-./scripts/install.sh --from-local -y -d /opt/deck -s /path/to/skills
+./scripts/install.sh -y -d /opt/deck -s /path/to/skills
 ```
 
 ## Docker
@@ -97,7 +82,7 @@ FROM node:20-bookworm
 RUN npm install -g openclaw
 WORKDIR /app
 COPY . .
-RUN bash ./scripts/install.sh -y -d /app/deck -s /root/.openclaw/workspace/skills --from-local
+RUN bash ./scripts/install.sh -y -d /app/deck -s /root/.openclaw/workspace/skills
 ENV PATH="/app/deck:$PATH"
 CMD ["deck", "start"]
 ```
@@ -110,15 +95,15 @@ For Alpine, add `RUN apk add --no-cache bash` before running the install script.
 
 ```powershell
 cd open-deck
-.\scripts\install.ps1 -FromLocal -Dir $env:USERPROFILE\deck -Yes
+.\scripts\install.ps1 -Dir $env:USERPROFILE\deck -Yes
 ```
 
-Options: `-Dir`, `-Skills`, `-Yes`, `-FromLocal` (same meaning as `-d`, `-s`, `-y`, `--from-local`).
+Options: `-Dir`, `-Skills`, `-Yes` (same meaning as `-d`, `-s`, `-y`).
 
 ### CMD
 
 ```cmd
-scripts\install.cmd -FromLocal -Yes
+scripts\install.cmd -Yes
 ```
 
 Use `deck.cmd` the same way as `deck.ps1` (e.g. `deck start`, `deck status`) after the install directory is on PATH.

@@ -5,29 +5,15 @@ DECK 是用于管理 OpenClaw 的助手服务，包含 backend（NestJS）和 fr
 ## 前置条件
 
 - 已安装 [OpenClaw](https://docs.openclaw.ai/)
-- Node.js、pnpm 或 npm（未安装 pnpm 时自动使用 npm）、curl（Linux/macOS 在线安装时需要）
+- Node.js、pnpm 或 npm（未安装 pnpm 时自动使用 npm）
 
 ## 安装
 
-### 方式一：一键安装（需提供 release 地址）
-
-将 `YOUR_ORG` 替换为你的 GitHub 组织或用户名：
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_ORG/open-deck/main/scripts/install.sh | bash
-```
-
-可通过环境变量指定 release 地址：
-
-```bash
-DECK_RELEASE_URL=https://github.com/YOUR_ORG/open-deck/releases/latest/download/deck.tar.gz curl -fsSL https://raw.githubusercontent.com/YOUR_ORG/open-deck/main/scripts/install.sh | bash
-```
-
-### 方式二：本地安装（git clone 后）
+### 方式：本地安装（git clone 后）
 
 ```bash
 cd open-deck
-./scripts/install.sh --from-local
+./scripts/install.sh
 ```
 
 完成安装后，在安装目录执行一次 `deck start` 即可。首次启动时，`deck` 会在安装目录下自动安装依赖并构建前端与后端（取决于网络与机器性能，可能需要数十秒）。
@@ -36,15 +22,14 @@ cd open-deck
 
 | 选项 | 说明 |
 |------|------|
-| `-d, --dir PATH` | 安装目录（默认：有 sudo 时 `/opt/deck`，否则 `~/deck`） |
+| `-d, --dir PATH` | 安装目录（默认：`~/deck`） |
 | `-s, --skills PATH` | skills 安装路径（默认：`~/.openclaw/workspace/skills/`） |
-| `-y, --yes` | 非交互模式，已存在的 skill 不覆盖 |
-| `--from-local` | 从当前目录复制（用于 git clone 后的本地安装） |
+| `-y, --yes` | 非交互模式，使用默认路径并自动覆盖同名 skill |
 
 示例：
 
 ```bash
-./scripts/install.sh --from-local -d ~/my-deck -s ~/.openclaw/workspace/skills
+./scripts/install.sh -d ~/my-deck -s ~/.openclaw/workspace/skills
 ```
 
 ## 环境变量
@@ -87,10 +72,10 @@ cd open-deck
 在云服务器或 CI 等无交互环境中，请使用 `-y`（或 `--yes`）进行非交互安装：
 
 ```bash
-./scripts/install.sh --from-local -y -d /opt/deck -s /path/to/skills
+./scripts/install.sh -y -d /opt/deck -s /path/to/skills
 ```
 
-- 已存在的 skill 不会提示覆盖，直接跳过。
+- 已存在的 skill 会自动覆盖，不再提示确认。
 - AGENTS.md 的 .openclaw 路径使用默认值，不等待输入。
 - 需预装 openclaw，安装脚本会执行 `openclaw gateway restart`（失败不中断安装）。
 
@@ -104,7 +89,7 @@ FROM node:20-bookworm
 RUN npm install -g openclaw   # 或按 openclaw 官方方式安装
 WORKDIR /app
 COPY . .
-RUN bash ./scripts/install.sh -y -d /app/deck -s /root/.openclaw/workspace/skills --from-local
+RUN bash ./scripts/install.sh -y -d /app/deck -s /root/.openclaw/workspace/skills
 ENV PATH="/app/deck:$PATH"
 CMD ["deck", "start"]
 ```
@@ -120,17 +105,17 @@ CMD ["deck", "start"]
 
 ```powershell
 cd open-deck
-.\scripts\install.ps1 -FromLocal -Dir $env:USERPROFILE\deck -Yes
+.\scripts\install.ps1 -Dir $env:USERPROFILE\deck -Yes
 ```
 
-安装选项：`-Dir`、`-Skills`、`-Yes`、`-FromLocal`，含义与 Linux/macOS 的 `-d`、`-s`、`-y`、`--from-local` 一致。安装完成后，安装目录会加入用户 PATH，重新打开终端后可直接执行 `deck start` 等。
+安装选项：`-Dir`、`-Skills`、`-Yes`，含义与 Linux/macOS 的 `-d`、`-s`、`-y` 一致。安装完成后，安装目录会加入用户 PATH，重新打开终端后可直接执行 `deck start` 等。
 
 ### CMD
 
 在 CMD 中通过包装脚本调用 PowerShell 即可：
 
 ```cmd
-scripts\install.cmd -FromLocal -Yes
+scripts\install.cmd -Yes
 ```
 
 `deck.cmd` 用法与 `deck.ps1` 相同（如 `deck start`、`deck status`），需在安装目录已加入 PATH 后使用。

@@ -90,7 +90,7 @@ And bosses need a dashboard.
 
 ### prerequisites
 - [OpenClaw](https://docs.openclaw.ai/) installed and configured
-- Node.js ≥18, and pnpm or npm (Linux/macOS one-line install requires curl)
+- Node.js ≥18, and pnpm or npm
 
 ### plan A
 
@@ -104,7 +104,7 @@ Visit https://github.com/netease-opendeck/opendeck to download and install OpenD
 git clone https://github.com/netease-opendeck/opendeck.git
 cd opendeck
 
-./scripts/install.sh --from-local
+./scripts/install.sh
 ```
 
 Then run `deck start` from the install directory, or add it to PATH as the install script does.
