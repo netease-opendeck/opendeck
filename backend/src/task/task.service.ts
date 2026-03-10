@@ -1,13 +1,106 @@
 import { Injectable } from '@nestjs/common';
+import * as fs from 'fs/promises';
 import { SkillExecutionService } from '../skill-execution/skill-execution.service';
-import { ExecutionRecord, TaskRecord } from '../skill-execution/interfaces/execution-record.interface';
+import {
+  ExecutionRecord,
+  MessageRecord,
+  TaskRecord,
+} from '../skill-execution/interfaces/execution-record.interface';
 import { ChildTaskDto, TaskItemDto, TaskStatsResponseDto } from './dto/task-response.dto';
+
+interface SessionFileRecord {
+  id?: string;
+  timestamp?: string;
+  message?: {
+    role?: string;
+    content?: Array<{
+      type?: string;
+      text?: string;
+    }>;
+    timestamp?: number;
+  };
+}
+
+interface SessionMessageItem extends MessageRecord {
+  id: string;
+}
 
 @Injectable()
 export class TaskService {
   constructor(private readonly skillExecutionService: SkillExecutionService) {}
 
-  private mapRecord(record: ExecutionRecord): TaskItemDto {
+  private lineToSessionMessage(line: string): SessionMessageItem | null {
+    let parsed: SessionFileRecord;
+    try {
+      parsed = JSON.parse(line) as SessionFileRecord;
+    } catch {
+      return null;
+    }
+
+    const id = parsed.id?.trim();
+    const role = parsed.message?.role?.trim();
+    if (!id || !role) return null;
+
+    const textBlocks = (parsed.message?.content ?? [])
+      .filter((block) => block?.type === 'text')
+      .map((block) => block?.text ?? '')
+      .filter((text) => text.length > 0);
+    const content = textBlocks.join('\n');
+
+    const timestamp =
+      parsed.timestamp ??
+      (typeof parsed.message?.timestamp === 'number'
+        ? new Date(parsed.message.timestamp).toISOString()
+        : undefined);
+
+    return {
+      id,
+      role,
+      content,
+      ...(timestamp != null && { timestamp }),
+    };
+  }
+
+  private async collectMessagesFromSessionFile(
+    sessionFile?: string,
+    startMessageId?: string,
+  ): Promise<MessageRecord[]> {
+    if (!sessionFile?.trim() || !startMessageId?.trim()) return [];
+
+    let content: string;
+    try {
+      content = await fs.readFile(sessionFile, 'utf-8');
+    } catch {
+      return [];
+    }
+
+    const messages = content
+      .split('\n')
+      .filter((line) => line.trim().length > 0)
+      .map((line) => this.lineToSessionMessage(line))
+      .filter((message): message is SessionMessageItem => message !== null);
+
+    const startIndex = messages.findIndex((message) => message.id === startMessageId);
+    if (startIndex < 0) return [];
+
+    let endAnchorIndex = -1;
+    for (let i = startIndex + 1; i < messages.length; i++) {
+      if (messages[i].role !== 'user') {
+        endAnchorIndex = i;
+      }
+    }
+
+    const collectionEnd = endAnchorIndex >= 0 ? endAnchorIndex : messages.length;
+    if (collectionEnd <= startIndex) return [];
+
+    return messages.slice(startIndex, collectionEnd).map((message) => ({
+      role: message.role,
+      content: message.content,
+      ...(message.timestamp != null && { timestamp: message.timestamp }),
+    }));
+  }
+
+  private async mapRecord(record: ExecutionRecord): Promise<TaskItemDto> {
     const tasks: TaskRecord[] = record.tasks ?? [];
 
     const childrenTasks: ChildTaskDto[] = tasks.map((task) => ({
@@ -48,11 +141,10 @@ export class TaskService {
         absolutePath: a.absolutePath,
       })) ?? [];
 
-    const messages = (record.messages ?? []).map((m) => ({
-      role: m.role,
-      content: m.content,
-      ...(m.timestamp != null && { timestamp: m.timestamp }),
-    }));
+    const messages = await this.collectMessagesFromSessionFile(
+      record.sessionFile,
+      record.startMessageId,
+    );
 
     const skillNames = (record.skills ?? []).map((s) => s.name);
 
@@ -72,7 +164,7 @@ export class TaskService {
 
   async getTasks(): Promise<TaskItemDto[]> {
     const records = await this.skillExecutionService.getRecords();
-    const tasks: TaskItemDto[] = records.map((record) => this.mapRecord(record));
+    const tasks: TaskItemDto[] = await Promise.all(records.map((record) => this.mapRecord(record)));
 
     tasks.sort((a, b) => {
       const ta = a.startedAt ? new Date(a.startedAt).getTime() : 0;

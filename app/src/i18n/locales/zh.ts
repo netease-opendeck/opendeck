@@ -36,6 +36,8 @@ export default {
     messages: '对话',
     user: '用户',
     assistant: '助手',
+    expand: '展开',
+    collapse: '收起',
     files: '文件',
     fileSize: '大小',
     bytes: '字节',
