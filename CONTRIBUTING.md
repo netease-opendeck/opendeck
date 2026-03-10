@@ -23,10 +23,4 @@ Thank you for your interest in contributing to DECK.
 
 ## Release packaging
 
-Maintainers can build a release tarball for GitHub Releases with:
-
-```bash
-./scripts/build-release.sh
-```
-
-This produces `deck.tar.gz` for release distribution and archive validation.
+`scripts/build-release.sh` is deprecated. OpenDeck now uses local-repository install flow (`./scripts/install.sh`) only.

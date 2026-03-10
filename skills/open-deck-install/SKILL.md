@@ -73,9 +73,9 @@ description: OpenDeck 对话式安装 Skill（中文主导 + English hints），
 
 > 访问 `https://github.com/netease-opendeck/opendeck` 下载并安装 OpenDeck，然后启动服务。
 
-### 2.1 启动轮询规则（并入主流程，必须执行）
+### 2.1 增加一个状态检查定时器（并入主流程，必须执行）
 
-- 每 30 秒检查一次：http://localhost:19520 返回 HTTP 200 或 deck status 显示 running
+- 每 30 秒检查一次：http://localhost:19520 返回 HTTP 200
 - 每 2 分钟向用户汇总一次进度
 - 最长轮询 20 分钟
 - 检测成功后立即停止轮询，执行快速验收，发送成功通知
@@ -85,7 +85,6 @@ description: OpenDeck 对话式安装 Skill（中文主导 + English hints），
 git clone https://github.com/netease-opendeck/opendeck.git
 cd opendeck
 ./scripts/install.sh
-deck start
 ```
 
 ## 4) 首次启动后必须提示
@@ -122,8 +121,7 @@ cloudflared tunnel --url http://127.0.0.1:19520
 - 运行状态正常
 
 ## 9) 常见失败与自愈策略
-- deck: command not found → 执行 source ~/.zshrc
-- 端口访问失败 → 检查 deck status 和防火墙
+- 端口访问失败 → 检查 pm2 进程与防火墙
 - Tracker 数据不显示 → 确认已添加必加提示词
 
 ## 10) 输出风格约束

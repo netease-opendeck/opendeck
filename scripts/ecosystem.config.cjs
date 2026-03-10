@@ -1,6 +1,6 @@
 /**
- * PM2 ecosystem config for deck (backend only, serves frontend statically)
- * Used by deck start/stop/restart/status
+ * PM2 ecosystem config for OpenDeck backend process
+ * Used by install/uninstall scripts
  */
 const path = require('path');
 

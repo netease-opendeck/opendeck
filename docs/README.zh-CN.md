@@ -97,8 +97,7 @@ cd opendeck
 ./scripts/install.sh
 ```
 
-然后从安装目录执行 `deck start`，或按安装脚本提示将安装目录加入 PATH。
-首次执行 `deck start` 时，会在安装目录下自动安装依赖并构建前端与后端（首次启动时间会稍长）。
+安装脚本会自动完成依赖安装、构建并启动服务（首次启动时间会稍长）。
 
 ## OpenClaw 中需手动添加的提示词
 
@@ -136,16 +135,11 @@ OpenDeck 从你的 OpenClaw 根目录读取数据：技能来自 `workspace/skil
 
 可选：`OPENCLAW_SKILLS_PATH`、`OPENCLAW_SKILL_EXECUTION_PATH`、`PORT`。详见 [后端 README](../backend/README.md)。
 
-## 管理命令
+## 卸载
 
-| 命令          | 说明                           |
-|---------------|--------------------------------|
-| `deck start`  | 启动后端（同时托管前端）       |
-| `deck stop`   | 停止后端                       |
-| `deck restart`| 重启后端                       |
-| `deck status` | 查看 PM2 状态                  |
-| `deck help`   | 显示帮助                       |
-| `deck remove` | 停止服务并删除安装目录及 skills |
+```bash
+./scripts/uninstall.sh
+```
 
 ## 文档
 

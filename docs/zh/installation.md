@@ -16,7 +16,7 @@ cd open-deck
 ./scripts/install.sh
 ```
 
-完成安装后，在安装目录执行一次 `deck start` 即可。首次启动时，`deck` 会在安装目录下自动安装依赖并构建前端与后端（取决于网络与机器性能，可能需要数十秒）。
+安装脚本会自动安装依赖、构建前后端并直接启动服务（取决于网络与机器性能，可能需要数十秒）。
 
 ### 安装选项
 
@@ -32,31 +32,17 @@ cd open-deck
 ./scripts/install.sh -d ~/my-deck -s ~/.openclaw/workspace/skills
 ```
 
-## 环境变量
+## 卸载
 
-安装完成后，`deck` 命令会自动注入 PATH，无需手动配置：
+使用卸载脚本：
 
-- **有 sudo**：软链接到 `/usr/local/bin/deck`，立即可用
-- **无 sudo**：修改 `~/.zshrc`、`~/.bashrc` 等 profile，需执行 `source ~/.zshrc` 或重新打开终端
-
-执行 `deck remove` 时会自动移除软链接或 profile 中的 deck 相关配置。
-
-## 管理命令
-
-安装完成后，使用 `deck` 命令管理服务：
-
-| 命令 | 说明 |
-|------|------|
-| `deck start` | 启动 backend 和 frontend |
-| `deck stop` | 停止 backend 和 frontend |
-| `deck restart` | 重启 backend 和 frontend |
-| `deck status` | 查看运行状态 |
-| `deck help` | 显示帮助 |
-| `deck remove` | 停止服务、删除安装目录及已安装的 skills |
+```bash
+./scripts/uninstall.sh
+```
 
 ## 依赖
 
-- **PM2**：进程管理，首次 `deck start` 时若未安装会自动安装，并给出必要提醒
+- **PM2**：进程管理，`install.sh` 会自动安装（若缺失）
 - **serve**：前端静态托管，由 `npx serve` 自动拉取
 
 ## 访问
@@ -65,7 +51,7 @@ cd open-deck
 
 ## 包管理器（pnpm / npm）
 
-安装与运行 deck 时，脚本会优先使用 **pnpm**；若未安装 pnpm，则自动退阶使用 **npm**。安装阶段使用的包管理器会写入安装目录下的 `.deck_pkg`，后续 `deck start` / `deck restart` 等会与之保持一致，无需额外配置。
+安装时脚本会优先使用 **pnpm**；若未安装 pnpm，则自动退阶使用 **npm**。安装阶段使用的包管理器会写入安装目录下的 `.deck_pkg`。
 
 ## 云服务器 / 非交互安装
 
@@ -90,8 +76,7 @@ RUN npm install -g openclaw   # 或按 openclaw 官方方式安装
 WORKDIR /app
 COPY . .
 RUN bash ./scripts/install.sh -y -d /app/deck -s /root/.openclaw/workspace/skills
-ENV PATH="/app/deck:$PATH"
-CMD ["deck", "start"]
+CMD ["bash", "./scripts/install.sh", "-y", "-d", "/app/deck", "-s", "/root/.openclaw/workspace/skills"]
 ```
 
 - 安装目录与 skills 路径可通过 `-d`、`-s` 指定；非交互务必加 `-y`。
@@ -108,7 +93,7 @@ cd open-deck
 .\scripts\install.ps1 -Dir $env:USERPROFILE\deck -Yes
 ```
 
-安装选项：`-Dir`、`-Skills`、`-Yes`，含义与 Linux/macOS 的 `-d`、`-s`、`-y` 一致。安装完成后，安装目录会加入用户 PATH，重新打开终端后可直接执行 `deck start` 等。
+安装选项：`-Dir`、`-Skills`、`-Yes`，含义与 Linux/macOS 的 `-d`、`-s`、`-y` 一致。
 
 ### CMD
 
@@ -118,4 +103,8 @@ cd open-deck
 scripts\install.cmd -Yes
 ```
 
-`deck.cmd` 用法与 `deck.ps1` 相同（如 `deck start`、`deck status`），需在安装目录已加入 PATH 后使用。
+Windows 卸载命令：
+
+```powershell
+.\scripts\uninstall.ps1 -Dir $env:USERPROFILE\deck
+```
