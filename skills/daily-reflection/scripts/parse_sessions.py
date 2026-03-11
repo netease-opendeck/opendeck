@@ -234,12 +234,16 @@ def parse_session_file(filepath, target_date):
             current_round = {
                 "user_request": clean_req[:500],
                 "timestamp": m["timestamp"],
+                "last_timestamp": m["timestamp"],
                 "assistant_responses": [],
                 "tools_used": [],
                 "errors": [],
                 "tokens": {"input": 0, "output": 0, "total": 0},
+                "duration_seconds": 0,
             }
         elif current_round:
+            if m.get("timestamp"):
+                current_round["last_timestamp"] = m["timestamp"]
             if m["role"] == "assistant":
                 if m.get("text"):
                     current_round["assistant_responses"].append(m["text"][:300])
@@ -263,6 +267,17 @@ def parse_session_file(filepath, target_date):
     if current_round:
         rounds.append(current_round)
     
+    # Calculate duration for each round
+    for r in rounds:
+        try:
+            t_start = datetime.fromisoformat(r["timestamp"].replace("Z", "+00:00"))
+            t_end = datetime.fromisoformat(r["last_timestamp"].replace("Z", "+00:00"))
+            r["duration_seconds"] = max(0, int((t_end - t_start).total_seconds()))
+        except (ValueError, TypeError):
+            r["duration_seconds"] = 0
+    
+    total_duration = sum(r.get("duration_seconds", 0) for r in rounds)
+
     return {
         "session_id": session_info["id"] if session_info else os.path.basename(filepath),
         "file": os.path.basename(filepath),
@@ -271,6 +286,7 @@ def parse_session_file(filepath, target_date):
             "total_output_tokens": total_output,
             "total_tokens": total_tokens,
             "total_cost": total_cost,
+            "total_duration_seconds": total_duration,
             "models_used": sorted(models_used),
             "tools_used": sorted(tools_used),
             "error_count": error_count,
@@ -318,11 +334,14 @@ def main():
         all_models.update(s["stats"]["models_used"])
         all_tools.update(s["stats"]["tools_used"])
     
+    total_duration = sum(s["stats"]["total_duration_seconds"] for s in results["sessions"])
+
     results["aggregate"] = {
         "total_tokens": total_tokens,
         "total_cost": total_cost,
         "total_errors": total_errors,
         "total_rounds": total_rounds,
+        "total_duration_seconds": total_duration,
         "models_used": sorted(all_models),
         "tools_used": sorted(all_tools),
     }
