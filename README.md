@@ -137,7 +137,7 @@ OpenClaw (workspace/skills, workspace/tracker-result/skill-execution.jsonl)
 └─────────────────────────────────────┘
 ```
 
-OpenDeck reads from your OpenClaw root: skills from `workspace/skills` and execution data from `workspace/tracker-result/skill-execution.jsonl`. No database—file-based.
+OpenDeck reads from your OpenClaw root: skills from `workspace/skills`, execution data from `workspace/tracker-result/skill-execution.jsonl`, and reflection markdown files from `workspace/memory/reflection`. No database—file-based.
 
 ## Configuration
 

@@ -16,3 +16,46 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+.markdown-view table {
+  width: max-content;
+  min-width: 100%;
+  display: table;
+  table-layout: auto;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.markdown-view {
+  overflow-x: auto;
+}
+
+.markdown-view thead tr {
+  background: #f8fafc;
+}
+
+.markdown-view th,
+.markdown-view td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  border-right: 1px solid #e2e8f0;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.markdown-view th:last-child,
+.markdown-view td:last-child {
+  border-right: 0;
+}
+
+.markdown-view tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.markdown-view tbody tr:nth-child(even) {
+  background: #fcfdff;
+}

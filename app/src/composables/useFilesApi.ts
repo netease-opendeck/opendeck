@@ -5,6 +5,22 @@ interface FilesResponse {
   files: FileItem[];
 }
 
+interface FileWarning {
+  scope: string;
+  path: string;
+  code: string;
+  message?: string;
+}
+
+interface FileTreeResponse {
+  tree: FileTreeNode[];
+  warnings?: FileWarning[];
+}
+
+interface FileStatsResponse extends FileStats {
+  warnings?: FileWarning[];
+}
+
 interface FileContentResponse {
   content: string;
 }
@@ -74,8 +90,8 @@ export async function fetchFiles(): Promise<FileItem[]> {
 
 export async function fetchFileTree(): Promise<FileTreeNode[]> {
   try {
-    const res = await http.get<FileTreeNode[]>('/files/tree');
-    return res.data ?? [];
+    const res = await http.get<FileTreeNode[] | FileTreeResponse>('/files/tree');
+    return Array.isArray(res.data) ? res.data : (res.data.tree ?? []);
   } catch (error) {
     throw normalizeFileError(error);
   }
@@ -83,8 +99,13 @@ export async function fetchFileTree(): Promise<FileTreeNode[]> {
 
 export async function fetchFileStats(): Promise<FileStats> {
   try {
-    const res = await http.get<FileStats>('/files/stats');
-    return res.data;
+    const res = await http.get<FileStats | FileStatsResponse>('/files/stats');
+    if (!res.data) return { today: 0, thisWeek: 0, total: 0 };
+    return {
+      today: res.data.today ?? 0,
+      thisWeek: res.data.thisWeek ?? 0,
+      total: res.data.total ?? 0,
+    };
   } catch (error) {
     throw normalizeFileError(error);
   }

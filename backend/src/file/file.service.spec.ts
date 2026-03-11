@@ -11,6 +11,10 @@ const MEMORY_DIR = path.join(FIXTURES_ROOT, 'memory');
 const IRAN_PATH = path.join(MEMORY_DIR, 'iran-news-report-2026-03-05.md');
 const OPENCLAW_PATH = path.join(MEMORY_DIR, 'openclaw-news-report-2026-03-05.md');
 const JSONL_PATH = path.join(MEMORY_DIR, 'skill-execution.jsonl');
+const REFLECTION_DIR = path.join(FIXTURES_ROOT, 'workspace', 'memory', 'reflection');
+const REFLECTION_PATH = path.join(REFLECTION_DIR, 'reflection-2026-03-01.md');
+const NESTED_REFLECTION_DIR = path.join(REFLECTION_DIR, 'nested');
+const NESTED_REFLECTION_PATH = path.join(NESTED_REFLECTION_DIR, 'note.md');
 
 const createJsonl = () => {
   const line1 = JSON.stringify({
@@ -46,7 +50,10 @@ describe('FileService', () => {
 
   beforeAll(async () => {
     await fs.mkdir(MEMORY_DIR, { recursive: true });
+    await fs.mkdir(NESTED_REFLECTION_DIR, { recursive: true });
     await fs.writeFile(JSONL_PATH, createJsonl());
+    await fs.writeFile(REFLECTION_PATH, '# reflection day 1\n');
+    await fs.writeFile(NESTED_REFLECTION_PATH, '# nested reflection\n');
   });
 
   beforeEach(async () => {
@@ -83,19 +90,20 @@ describe('FileService', () => {
   });
 
   describe('getFiles()', () => {
-    it('returns empty array when jsonl does not exist', async () => {
-      jest.spyOn(skillExecutionService, 'getRecords').mockResolvedValue([]);
+    it('returns empty array when OPENCLAW_ROOT is not configured', async () => {
+      (configService.get as jest.Mock).mockImplementation((key: string) => {
+        if (key === 'OPENCLAW_ROOT') return null;
+        return undefined;
+      });
       const result = await service.getFiles();
       expect(result).toEqual([]);
     });
 
-    it('returns empty array when jsonl is empty', async () => {
-      const emptyPath = path.join(MEMORY_DIR, 'empty-exec.jsonl');
-      await fs.writeFile(emptyPath, '');
+    it('includes reflection markdown files recursively', async () => {
       jest.spyOn(skillExecutionService, 'getRecords').mockResolvedValue([]);
       const result = await service.getFiles();
-      expect(result).toEqual([]);
-      await fs.unlink(emptyPath).catch(() => {});
+      expect(result.some((f) => f.filePath === REFLECTION_PATH)).toBe(true);
+      expect(result.some((f) => f.filePath === NESTED_REFLECTION_PATH)).toBe(true);
     });
 
     it('returns parsed file list for valid records', async () => {
@@ -104,7 +112,7 @@ describe('FileService', () => {
       ) as ExecutionRecord[];
       jest.spyOn(skillExecutionService, 'getRecords').mockResolvedValue(records);
       const result = await service.getFiles();
-      expect(result.length).toBe(2);
+      expect(result.length).toBe(4);
 
       const iran = result.find((f) => f.fileName === 'iran-news-report-2026-03-05.md');
       expect(iran).toBeDefined();
@@ -115,6 +123,10 @@ describe('FileService', () => {
       expect(openclaw).toBeDefined();
       expect(openclaw!.skillName).toBe('none');
       expect(openclaw!.createdAt).toBeNull();
+
+      const reflection = result.find((f) => f.filePath === REFLECTION_PATH);
+      expect(reflection).toBeDefined();
+      expect(reflection!.skillName).toBe('reflection');
     });
 
     it('artifact with taskId gets skillName from tasks', async () => {
@@ -157,8 +169,9 @@ describe('FileService', () => {
       const records: ExecutionRecord[] = [JSON.parse(line) as ExecutionRecord];
       jest.spyOn(skillExecutionService, 'getRecords').mockResolvedValue(records);
       const result = await service.getFiles();
-      expect(result.length).toBe(1);
-      expect(result[0].createdAt).toBe('2026-03-05T09:00:05Z');
+      const testFile = result.find((f) => f.filePath === path.join(MEMORY_DIR, 'test.md'));
+      expect(testFile).toBeDefined();
+      expect(testFile!.createdAt).toBe('2026-03-05T09:00:05Z');
     });
 
     it('deduplicates by absolutePath keeping latest by record timestamp', async () => {
@@ -182,6 +195,55 @@ describe('FileService', () => {
       expect(iran).toBeDefined();
       expect(iran!.createdAt).toBe('2026-03-06T10:00:10Z');
     });
+
+    it('prefers artifacts when path overlaps reflection file', async () => {
+      const records: ExecutionRecord[] = [
+        {
+          timestamp: '2026-03-08T10:00:00Z',
+          tasks: [{ id: 'task-r', skill: 'writer', endedAt: '2026-03-08T10:00:10Z' }],
+          artifacts: [{ taskId: 'task-r', fileName: path.basename(REFLECTION_PATH), absolutePath: REFLECTION_PATH }],
+        } as unknown as ExecutionRecord,
+      ];
+      jest.spyOn(skillExecutionService, 'getRecords').mockResolvedValue(records);
+
+      const result = await service.getFiles();
+      const samePath = result.find((f) => f.filePath === REFLECTION_PATH);
+      expect(samePath).toBeDefined();
+      expect(samePath!.skillName).toBe('writer');
+      expect(samePath!.createdAt).toBe('2026-03-08T10:00:10Z');
+    });
+
+    it('sorts by createdAt desc with nulls last', async () => {
+      const records: ExecutionRecord[] = JSON.parse(
+        '[' + createJsonl().split('\n').filter(Boolean).join(',') + ']',
+      ) as ExecutionRecord[];
+      jest.spyOn(skillExecutionService, 'getRecords').mockResolvedValue(records);
+
+      const result = await service.getFiles();
+      for (let i = 1; i < result.length; i++) {
+        const prev = result[i - 1].createdAt ? Date.parse(result[i - 1].createdAt as string) : Number.NaN;
+        const curr = result[i].createdAt ? Date.parse(result[i].createdAt as string) : Number.NaN;
+        if (Number.isFinite(prev) && Number.isFinite(curr)) {
+          expect(prev).toBeGreaterThanOrEqual(curr);
+        }
+        if (!Number.isFinite(prev)) {
+          expect(Number.isFinite(curr)).toBe(false);
+        }
+      }
+    });
+  });
+
+  describe('getFilesResult()', () => {
+    it('returns warnings when reflection directory cannot be read', async () => {
+      jest
+        .spyOn(service as unknown as { getReflectionRoot: (root: string) => string }, 'getReflectionRoot')
+        .mockReturnValue(path.join(FIXTURES_ROOT, 'workspace', 'memory', 'missing-reflection'));
+      jest.spyOn(skillExecutionService, 'getRecords').mockResolvedValue([]);
+
+      const result = await service.getFilesResult();
+      expect(result.warnings.length).toBeGreaterThan(0);
+      expect(result.warnings[0].scope).toBe('reflection-scan');
+    });
   });
 
   describe('getFileTree()', () => {
@@ -194,13 +256,31 @@ describe('FileService', () => {
     });
   });
 
+  describe('getFileTreeResult()', () => {
+    it('returns tree and warnings', async () => {
+      const result = await service.getFileTreeResult();
+      expect(Array.isArray(result.tree)).toBe(true);
+      expect(Array.isArray(result.warnings)).toBe(true);
+    });
+  });
+
   describe('getFileStats()', () => {
     it('returns today, thisWeek, total', async () => {
       const result = await service.getFileStats();
       expect(result).toHaveProperty('today');
       expect(result).toHaveProperty('thisWeek');
       expect(result).toHaveProperty('total');
-      expect(result.total).toBe(2);
+      expect(result.total).toBe(4);
+    });
+  });
+
+  describe('getFileStatsResult()', () => {
+    it('returns stats and warnings', async () => {
+      const result = await service.getFileStatsResult();
+      expect(result).toHaveProperty('today');
+      expect(result).toHaveProperty('thisWeek');
+      expect(result).toHaveProperty('total');
+      expect(result).toHaveProperty('warnings');
     });
   });
 

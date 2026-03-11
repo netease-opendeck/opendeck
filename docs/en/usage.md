@@ -16,7 +16,7 @@ Copy `backend/.env.example` to `backend/.env` and set `OPENCLAW_ROOT` before run
 ## UI overview
 
 - **Skills** — Lists skills from `OPENCLAW_ROOT/OPENCLAW_SKILLS_PATH`. Click a skill to view its SKILL.md and metadata.
-- **File management** — Files referenced in skill execution records; browse by directory, search, filter by type, preview content.
+- **File management** — Aggregates files from skill execution records and Markdown files under `OPENCLAW_ROOT/workspace/memory/reflection`; browse by directory, search, filter by type, and preview content.
 - **Task history** — Past skill executions; filter by time range and view details.
 
 ## API
@@ -29,7 +29,7 @@ Main endpoints:
 
 - `GET /api/skills` — List skills  
 - `GET /api/skills/:slug` — Skill detail (including doc)  
-- `GET /api/files`, `GET /api/files/tree`, `GET /api/files/stats`, `GET /api/files/content` — File APIs  
+- `GET /api/files`, `GET /api/files/tree`, `GET /api/files/stats`, `GET /api/files/content` — File APIs (`files/tree/stats` include `warnings` for partial reflection scan failures)  
 - `GET /api/tasks`, `GET /api/tasks/stats` — Task APIs  
 
 ## Troubleshooting
