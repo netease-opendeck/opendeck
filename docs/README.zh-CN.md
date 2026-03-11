@@ -86,7 +86,11 @@ Boss需要管理看板。
 
 ### 方式一
 你可以将以下提示词发送给你的 OpenClaw，即可自动完成安装与启动。
-访问 https://github.com/netease-opendeck/opendeck 下载并安装 OpenDeck，然后启动服务。
+
+```markdown
+请按照这个 SKILL.md 帮我完成 open-deck 的部署：
+https://github.com/netease-opendeck/opendeck/blob/main/SKILL.md
+```
 
 ### 方式二
 

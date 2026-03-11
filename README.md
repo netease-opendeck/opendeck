@@ -96,7 +96,10 @@ And bosses need a dashboard.
 
 You can send the following prompt to your OpenClaw to automatically install and start OpenDeck.
 
-Visit https://github.com/netease-opendeck/opendeck to download and install OpenDeck, then start the service
+```markdown
+Please follow this `SKILL.md` to help me deploy open-deck:
+https://github.com/netease-opendeck/opendeck/blob/main/SKILL.md
+```
 
 ### plan B
 
