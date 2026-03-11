@@ -12,15 +12,22 @@ describe('TaskController', () => {
   const mockTasks = [
     {
       taskName: '合肥天气查询',
-      skillName: 'weather',
+      skillNames: ['weather'],
       startedAt: '2026-03-05T08:54:00Z',
       endedAt: '2026-03-05T08:54:10Z',
       error: null,
-      detail: '查询合肥当前天气及三天预报',
       artifacts: [],
-      messages: [
-        { role: 'user', content: '查询合肥天气', timestamp: '2026-03-05T08:54:00Z' },
-        { role: 'assistant', content: '合肥当前晴，15°C。', timestamp: '2026-03-05T08:54:10Z' },
+      childrenTasks: [
+        {
+          id: 'm-1',
+          role: 'user',
+          timestamp: '2026-03-05T08:54:00Z',
+          content: [{ type: 'text', text: '查询合肥天气' }],
+          isError: false,
+          name: null,
+          status: null,
+          error: null,
+        },
       ],
     },
   ];

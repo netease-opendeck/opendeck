@@ -4,14 +4,13 @@ export interface TaskArtifact {
   absolutePath: string;
 }
 
-export interface TaskMessage {
-  role: string;
-  content: string;
-  timestamp?: string;
-}
-
 export interface ChildTask {
   id: string;
+  role: string;
+  timestamp: string | null;
+  content: Array<Record<string, unknown>>;
+  isError: boolean;
+  // Backward-compatible fields from API
   name: string | null;
   status: string | null;
   error: string | null;
@@ -25,7 +24,6 @@ export interface TaskHistoryItem {
   endedAt: string | null;
   error: string | null;
   artifacts: TaskArtifact[];
-  messages: TaskMessage[];
   childrenTasks: ChildTask[];
 }
 

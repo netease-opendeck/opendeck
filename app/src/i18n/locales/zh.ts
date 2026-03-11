@@ -32,6 +32,8 @@ export default {
     created: '创建',
     ended: '结束',
     duration: '耗时',
+    steps: '执行步骤',
+    noSteps: '暂无执行步骤',
     detail: '详情',
     messages: '对话',
     user: '用户',

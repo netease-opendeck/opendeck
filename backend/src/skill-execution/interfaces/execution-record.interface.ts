@@ -21,7 +21,8 @@ export interface TaskRecord {
 
 export interface MessageRecord {
   role: string;
-  content: string;
+  content: Array<Record<string, unknown>>;
+  isError?: boolean;
   timestamp?: string;
 }
 

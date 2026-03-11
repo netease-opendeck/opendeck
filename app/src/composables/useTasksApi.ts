@@ -18,8 +18,16 @@ interface TasksListResponseDto {
       fileSize: number | null;
       absolutePath: string;
     }[];
-    messages?: { role: string; content: string; timestamp?: string }[];
-    childrenTasks?: { id: string; name: string | null; status: string | null; error: string | null }[];
+    childrenTasks?: {
+      id: string;
+      role: string;
+      timestamp: string | null;
+      content: Array<Record<string, unknown>>;
+      isError: boolean;
+      name: string | null;
+      status: string | null;
+      error: string | null;
+    }[];
   }[];
 }
 
@@ -87,12 +95,6 @@ export async function fetchTasks(): Promise<TaskHistoryItem[]> {
           absolutePath: a.absolutePath,
         })) ?? [];
 
-      const messages = (t.messages ?? []).map((m) => ({
-        role: m.role,
-        content: m.content,
-        ...(m.timestamp != null && { timestamp: m.timestamp }),
-      }));
-
       return {
         id,
         taskName: t.taskName,
@@ -101,10 +103,13 @@ export async function fetchTasks(): Promise<TaskHistoryItem[]> {
         endedAt: t.endedAt,
         error: t.error,
         artifacts,
-        messages,
         childrenTasks:
           t.childrenTasks?.map((c) => ({
             id: c.id,
+            role: c.role,
+            timestamp: c.timestamp,
+            content: c.content ?? [],
+            isError: c.isError ?? false,
             name: c.name,
             status: c.status,
             error: c.error,

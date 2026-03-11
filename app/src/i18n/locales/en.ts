@@ -33,6 +33,8 @@ export default {
     created: 'Created',
     ended: 'Ended',
     duration: 'Duration',
+    steps: 'Execution steps',
+    noSteps: 'No execution steps',
     detail: 'Details',
     messages: 'Conversation',
     user: 'User',
