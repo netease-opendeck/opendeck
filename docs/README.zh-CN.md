@@ -90,6 +90,7 @@ Boss需要管理看板。
 ```markdown
 请按照这个 SKILL.md 帮我完成 open-deck 的部署：
 https://github.com/netease-opendeck/opendeck/blob/main/SKILL.md
+在安装完成之后，读取工作区 `AGENTS.MD`、`skill-tracker/SKILL.MD`、`daily-reflection/SKILL.MD`，并在后续所有agent的所有session中严格遵守执行。
 ```
 
 ### 方式二
@@ -103,11 +104,12 @@ cd opendeck
 
 安装脚本会自动完成依赖安装、构建并启动服务（首次启动时间会稍长）。
 
-## OpenClaw 中需手动添加的提示词
-
 在 OpenClaw 对话中请至少添加一次以下提示词，以便助手加载并遵守 tracker 规范：
 
-- **中文：** 读取 AGENTS.MD 和 skill-tracker/SKILL.MD，严格遵守执行。
+```markdown
+在安装完成之后，读取工作区的 `AGENTS.MD`、`skill-tracker/SKILL.MD`、`daily-reflection/SKILL.MD`，并在后续所有agent的所有session中严格遵守执行。
+```
+
 
 ## 推荐模型
 
