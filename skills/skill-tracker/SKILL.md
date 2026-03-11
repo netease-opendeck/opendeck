@@ -100,31 +100,26 @@ Save both values — you'll use them in every subsequent step.
 
 ---
 
-### Step 2: Find current turn's start message ID
+### Step 2 + 3: Create the initial tracker record
 
-Use the helper script to find the message `id` of the last user message (= start of current turn):
-
-```bash
-node <skill-dir>/find-user-message-id.js <session-jsonl-path> 1
-```
-
-This outputs the message id string (e.g. `3aca83be`). Save it as `START_MSG_ID`.
-
----
-
-### Step 3: Create the initial tracker record
-
-Build the JSON record with:
-- `sessionId`, `sessionFile`, `startMessageId`, `timestamp`
+Build a JSON object with all fields **except** `startMessageId` (the script injects it automatically):
+- `sessionId`, `sessionFile`, `timestamp`
+- `turnName`
 - `skills` array (matched skills, excluding skill-tracker)
 - `tasks` array with `status: "pending"` or `"running"`
 - Empty `artifacts`
 
-Append it as a new line to the JSONL file:
+Pipe the JSON into the helper script. It will auto-detect the correct `startMessageId` from the session JSONL and append the complete record:
 
 ```bash
-echo '<JSON_RECORD>' >> workspace/tracker-result/skill-execution.jsonl
+cat <<'RECORD' | node <skill-dir>/append-record.js <session-jsonl-path> workspace/tracker-result/skill-execution.jsonl
+<JSON_RECORD_WITHOUT_startMessageId>
+RECORD
 ```
+
+The script outputs the injected `startMessageId` to stdout (for logging only — you do **not** need to read or copy it).
+
+> **Why a script?** Hex message IDs are long arbitrary strings. Letting the LLM copy them manually leads to truncation (e.g. `a3f8c91b` → `a3f8c9`). The script reads the ID directly from the session file, eliminating this risk.
 
 ---
 
@@ -177,24 +172,24 @@ pm2 jlist 2>/dev/null | node -e "
 
 **This step MUST be the very last tool call in the turn.** No other tool calls should follow it.
 
-1. **Update the last line** of the JSONL file:
-   - Set task `status` to `"completed"` or `"failed"`
-   - Fill in `endedAt`, `output`, `error`
-   - Add `artifacts` if any files were generated
+Pipe only the **changed fields** into the update script. It merges them into the last line of the JSONL, preserving `startMessageId`, `sessionId`, `sessionFile`, and any other fields you don't include:
+
+- Set task `status` to `"completed"` or `"failed"`
+- Fill in `endedAt`, `output`, `error`
+- Add `artifacts` if any files were generated
 
 ```bash
-# Read the file, replace the last line, write it back
-node -e "
-  const fs = require('fs');
-  const path = 'workspace/tracker-result/skill-execution.jsonl';
-  const lines = fs.readFileSync(path,'utf8').trim().split('\n');
-  const updated = JSON.parse(JSON.stringify(UPDATED_RECORD));
-  lines[lines.length - 1] = JSON.stringify(updated);
-  fs.writeFileSync(path, lines.join('\n') + '\n');
-"
+cat <<'UPDATE' | node <skill-dir>/update-record.js workspace/tracker-result/skill-execution.jsonl
+<JSON_WITH_ONLY_CHANGED_FIELDS>
+UPDATE
 ```
 
-> **Important**: Only the last line is replaced. All prior lines remain untouched.
+Merge rules:
+- Top-level scalars overwrite existing values
+- `tasks`: matched by `id`; per-task fields are merged (unchanged tasks are kept)
+- `artifacts` / `skills`: replaced entirely if provided
+
+> **Important**: Only the last line is updated. All prior lines remain untouched. You do NOT need to repeat `startMessageId` or other unchanged fields.
 
 ## Rules Summary
 
