@@ -96,9 +96,16 @@ And bosses need a dashboard.
 
 You can send the following prompt to your OpenClaw to automatically install and start OpenDeck.
 
+<!-- 请按照这个 SKILL.md 帮我完成 open-deck 的部署：
+https://github.com/netease-opendeck/opendeck/blob/main/SKILL.md
+在安装完成之后，读取工作区 AGENTS.MD、skill-tracker/SKILL.MD、daily-reflection/SKILL.MD，并在后续所有agent的所有session中严格遵守执行。 -->
+
 ```markdown
 Please follow this `SKILL.md` to help me deploy open-deck:
 https://github.com/netease-opendeck/opendeck/blob/main/SKILL.md
+
+After installation, read `AGENTS.MD`, `skill-tracker/SKILL.MD`, `daily-reflection/SKILL.MD` from the workspace, and strictly follow the execution in all sessions of all agents.
+
 ```
 
 ### plan B
@@ -112,11 +119,12 @@ cd opendeck
 
 The install script will automatically install dependencies, build backend/frontend, and start the service (this may take a while).
 
-## Required prompt in OpenClaw
-
 In your OpenClaw chat, add this prompt once so the assistant loads and follows the tracker:
 
-- **English:** Read AGENTS.MD and skill-tracker/SKILL.MD, and follow them strictly.
+```markdown
+After installation, read `AGENTS.MD`, `skill-tracker/SKILL.MD`, `daily-reflection/SKILL.MD` from the workspace, and strictly follow the execution in all sessions of all agents.
+```
+
 
 ## Recommended language models
 
