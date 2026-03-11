@@ -144,12 +144,43 @@ if (Test-Path $agentsConfigPath -PathType Leaf) {
     $agentsConfig = Get-Content -Path $agentsConfigPath -Raw -Encoding utf8 | ConvertFrom-Json
     $openclawRoot = Resolve-OpenClawRoot
     if (Test-Path $openclawRoot -PathType Container) {
+        $markerStart = if ($agentsConfig.markerStart) { [string]$agentsConfig.markerStart } else { "<!-- OPENDECK_AGENTS_BLOCK_START -->" }
+        $markerEnd = if ($agentsConfig.markerEnd) { [string]$agentsConfig.markerEnd } else { "<!-- OPENDECK_AGENTS_BLOCK_END -->" }
+        $appendContent = if ($agentsConfig.appendContent) { ([string]$agentsConfig.appendContent).TrimEnd() } else { "" }
+        if (-not $appendContent) { $appendContent = "" }
+        $keywords = @()
+        if ($agentsConfig.duplicateKeywords) {
+            foreach ($kw in $agentsConfig.duplicateKeywords) {
+                if ($kw) { $keywords += [string]$kw }
+            }
+        }
+        $keywords += $markerStart
+        $keywords += $markerEnd
+        $keywords = $keywords | Where-Object { $_ -and $_.Trim().Length -gt 0 } | Select-Object -Unique
+        $block = "$markerStart`n$appendContent`n$markerEnd`n"
+
         $agentsFiles = Get-ChildItem -Path $openclawRoot -Filter "AGENTS.md" -Recurse -File -ErrorAction SilentlyContinue
         foreach ($f in $agentsFiles) {
             $content = Get-Content -Path $f.FullName -Raw -ErrorAction SilentlyContinue
+            if (-not $content) { $content = "" }
+            $hasMarkers = $content.Contains($markerStart) -and $content.Contains($markerEnd)
+            if ($hasMarkers) {
+                $pattern = [regex]::new([regex]::Escape($markerStart) + "[\s\S]*?" + [regex]::Escape($markerEnd) + "\s*", [System.Text.RegularExpressions.RegexOptions]::Singleline)
+                $replaced = $pattern.Replace($content, $block)
+                if ($replaced -ne $content) {
+                    Set-Content -Path $f.FullName -Value $replaced -Encoding utf8
+                }
+                continue
+            }
+
             $alreadyHas = $false
-            foreach ($kw in $agentsConfig.duplicateKeywords) { if ($content -and $content -match [regex]::Escape($kw)) { $alreadyHas = $true; break } }
-            if (-not $alreadyHas) { Add-Content -Path $f.FullName -Value $agentsConfig.appendContent -Encoding utf8 }
+            foreach ($kw in $keywords) {
+                if ($content.Contains($kw)) { $alreadyHas = $true; break }
+            }
+            if (-not $alreadyHas) {
+                $prefix = if ($content.Length -eq 0 -or $content.EndsWith("`n")) { "" } else { "`n" }
+                Set-Content -Path $f.FullName -Value ($content + $prefix + $block) -Encoding utf8
+            }
         }
     }
 }

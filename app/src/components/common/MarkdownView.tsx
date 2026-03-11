@@ -16,7 +16,7 @@ export default defineComponent({
 
     return () => (
       <div
-        class="prose prose-slate max-w-none text-slate-600 text-sm leading-relaxed"
+        class="markdown-view prose prose-slate max-w-none text-slate-600 text-sm leading-relaxed"
         // doc 内容来自受控后端 SKILL.md，这里信任其安全性
         v-html={html.value as string}
       />

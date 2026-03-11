@@ -154,40 +154,61 @@ update_agents_md() {
     return 0
   fi
 
-  local content_file keywords_file
-  content_file="${TMPDIR:-/tmp}/agents-append-$$.txt"
-  keywords_file="${TMPDIR:-/tmp}/agents-keywords-$$.txt"
-  node -e "
+  node - "$config_path" "$openclaw_root" <<'NODE'
 const fs=require('fs');
-const c=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));
-fs.writeFileSync(process.argv[2],c.appendContent);
-fs.writeFileSync(process.argv[3],c.duplicateKeywords.join('\n'));
-" "$config_path" "$content_file" "$keywords_file"
+const path=require('path');
 
-  local count
-  count=$(find "$openclaw_root" -name "AGENTS.md" -type f 2>/dev/null | wc -l | tr -d ' ')
-  if [ "$count" = "0" ]; then
-    echo "[AGENTS.md] 未在 $openclaw_root 下找到 AGENTS.md，跳过写入"
-    rm -f "$content_file" "$keywords_file"
-    return 0
-  fi
+const config=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+const root=process.argv[3];
+const markerStart=String(config.markerStart || '<!-- OPENDECK_AGENTS_BLOCK_START -->');
+const markerEnd=String(config.markerEnd || '<!-- OPENDECK_AGENTS_BLOCK_END -->');
+const appendContent=String(config.appendContent || '').trimEnd();
+if (!appendContent) process.exit(0);
+const duplicateKeywords=Array.from(new Set([
+  ...(Array.isArray(config.duplicateKeywords) ? config.duplicateKeywords : []),
+  markerStart,
+  markerEnd,
+].map((v)=>String(v || '').trim()).filter(Boolean)));
 
-  find "$openclaw_root" -name "AGENTS.md" -type f 2>/dev/null | while IFS= read -r file; do
-    local already_has=0
-    while IFS= read -r kw; do
-      [ -z "$kw" ] && continue
-      if grep -q "$kw" "$file" 2>/dev/null; then
-        already_has=1
-        break
-      fi
-    done < "$keywords_file"
-    if [ "$already_has" = "1" ]; then
-      continue
-    fi
-    cat "$content_file" >> "$file" 2>/dev/null || true
-  done
+const block=markerStart + '\\n' + appendContent + '\\n' + markerEnd + '\\n';
 
-  rm -f "$content_file" "$keywords_file"
+function walkAgentsMd(dir, out){
+  let entries=[];
+  try { entries=fs.readdirSync(dir,{withFileTypes:true}); } catch { return; }
+  for (const entry of entries){
+    const full=path.join(dir, entry.name);
+    if (entry.isDirectory()) walkAgentsMd(full, out);
+    else if (entry.isFile() && entry.name === 'AGENTS.md') out.push(full);
+  }
+}
+
+function escapeRegExp(input){
+  return input.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');
+}
+
+const files=[];
+walkAgentsMd(root, files);
+if (!files.length){
+  console.log('[AGENTS.md] 未在 ' + root + ' 下找到 AGENTS.md，跳过写入');
+  process.exit(0);
+}
+
+for (const file of files){
+  let content='';
+  try { content=fs.readFileSync(file,'utf8'); } catch { continue; }
+  const hasMarkers=content.includes(markerStart) && content.includes(markerEnd);
+  if (hasMarkers){
+    const pattern=new RegExp(escapeRegExp(markerStart) + '[\\\\s\\\\S]*?' + escapeRegExp(markerEnd) + '\\\\s*','g');
+    const replaced=content.replace(pattern, block);
+    if (replaced !== content) fs.writeFileSync(file, replaced);
+    continue;
+  }
+  const alreadyHas=duplicateKeywords.some((kw)=>content.includes(kw));
+  if (alreadyHas) continue;
+  const prefix=content.endsWith('\\n') || content.length===0 ? '' : '\\n';
+  fs.writeFileSync(file, content + prefix + block);
+}
+NODE
 }
 
 ensure_build() {

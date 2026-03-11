@@ -7,6 +7,11 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FileService } from './file.service';
+import {
+  FilesResponseDto,
+  FileStatsResponseDto,
+  FileTreeResponseDto,
+} from './dto/file-response.dto';
 
 @ApiTags('files')
 @Controller('files')
@@ -15,7 +20,7 @@ export class FileController {
 
   @Get()
   @ApiOperation({ summary: '获取所有文件列表' })
-  @ApiResponse({ status: 200, description: '返回文件列表' })
+  @ApiResponse({ status: 200, description: '返回文件列表', type: FilesResponseDto })
   async getFiles() {
     if (!this.fileService.getOpenclawRoot()) {
       throw new HttpException(
@@ -27,13 +32,12 @@ export class FileController {
         HttpStatus.SERVICE_UNAVAILABLE,
       );
     }
-    const files = await this.fileService.getFiles();
-    return { files };
+    return this.fileService.getFilesResult();
   }
 
   @Get('tree')
   @ApiOperation({ summary: '获取文件树' })
-  @ApiResponse({ status: 200, description: '按目录分组的文件树' })
+  @ApiResponse({ status: 200, description: '按目录分组的文件树', type: FileTreeResponseDto })
   async getFileTree() {
     if (!this.fileService.getOpenclawRoot()) {
       throw new HttpException(
@@ -45,12 +49,12 @@ export class FileController {
         HttpStatus.SERVICE_UNAVAILABLE,
       );
     }
-    return this.fileService.getFileTree();
+    return this.fileService.getFileTreeResult();
   }
 
   @Get('stats')
   @ApiOperation({ summary: '获取文件统计' })
-  @ApiResponse({ status: 200, description: '今天、本周、全部数量' })
+  @ApiResponse({ status: 200, description: '今天、本周、全部数量', type: FileStatsResponseDto })
   async getFileStats() {
     if (!this.fileService.getOpenclawRoot()) {
       throw new HttpException(
@@ -62,7 +66,7 @@ export class FileController {
         HttpStatus.SERVICE_UNAVAILABLE,
       );
     }
-    return this.fileService.getFileStats();
+    return this.fileService.getFileStatsResult();
   }
 
   @Get('by-path')

@@ -21,6 +21,7 @@ describe('FileController', () => {
   ];
 
   const mockStats = { today: 1, thisWeek: 2, total: 3 };
+  const mockWarnings = [{ scope: 'reflection-scan', path: '/x', code: 'EACCES' }];
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -31,10 +32,13 @@ describe('FileController', () => {
           useValue: {
             getOpenclawRoot: jest.fn(),
             getFiles: jest.fn(),
+            getFilesResult: jest.fn(),
             getFileByPath: jest.fn(),
             getFileContent: jest.fn(),
             getFileTree: jest.fn(),
+            getFileTreeResult: jest.fn(),
             getFileStats: jest.fn(),
+            getFileStatsResult: jest.fn(),
           },
         },
       ],
@@ -45,12 +49,15 @@ describe('FileController', () => {
   });
 
   describe('GET /files', () => {
-    it('returns { files: [...] } when normal', async () => {
+    it('returns { files, warnings } when normal', async () => {
       jest.spyOn(fileService, 'getOpenclawRoot').mockReturnValue('/tmp');
-      jest.spyOn(fileService, 'getFiles').mockResolvedValue(mockFiles);
+      jest.spyOn(fileService, 'getFilesResult').mockResolvedValue({
+        files: mockFiles,
+        warnings: mockWarnings,
+      });
 
       const result = await controller.getFiles();
-      expect(result).toEqual({ files: mockFiles });
+      expect(result).toEqual({ files: mockFiles, warnings: mockWarnings });
     });
 
     it('throws 503 when OPENCLAW_ROOT is not configured', async () => {
@@ -135,12 +142,15 @@ describe('FileController', () => {
   });
 
   describe('GET /files/tree', () => {
-    it('returns 200 with tree', async () => {
+    it('returns 200 with tree and warnings', async () => {
       jest.spyOn(fileService, 'getOpenclawRoot').mockReturnValue('/tmp');
-      jest.spyOn(fileService, 'getFileTree').mockResolvedValue(mockTree);
+      jest.spyOn(fileService, 'getFileTreeResult').mockResolvedValue({
+        tree: mockTree,
+        warnings: mockWarnings,
+      });
 
       const result = await controller.getFileTree();
-      expect(result).toEqual(mockTree);
+      expect(result).toEqual({ tree: mockTree, warnings: mockWarnings });
     });
 
     it('throws 503 when OPENCLAW_ROOT is not configured', async () => {
@@ -153,12 +163,15 @@ describe('FileController', () => {
   });
 
   describe('GET /files/stats', () => {
-    it('returns 200 with stats', async () => {
+    it('returns 200 with stats and warnings', async () => {
       jest.spyOn(fileService, 'getOpenclawRoot').mockReturnValue('/tmp');
-      jest.spyOn(fileService, 'getFileStats').mockResolvedValue(mockStats);
+      jest.spyOn(fileService, 'getFileStatsResult').mockResolvedValue({
+        ...mockStats,
+        warnings: mockWarnings,
+      });
 
       const result = await controller.getFileStats();
-      expect(result).toEqual(mockStats);
+      expect(result).toEqual({ ...mockStats, warnings: mockWarnings });
     });
 
     it('throws 503 when OPENCLAW_ROOT is not configured', async () => {
