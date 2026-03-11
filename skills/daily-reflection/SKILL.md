@@ -12,7 +12,7 @@ Generate a structured daily reflection report by parsing session conversation lo
 1. **Setup cron job** (first time or on-demand): Ask user for preferred trigger time, check for existing job, create/update the scheduled task
 2. Run the session parser script to extract today's data
 3. Analyze the parsed data to produce 4 reflection sections
-4. Write a markdown report to `memory/reflection-YYYY-MM-DD.md`
+4. Write a markdown report to `memory/reflection/reflection-YYYY-MM-DD.md`
 5. Send the report to the user
 
 ## Step 0: Cron Job Setup (run first on every activation)
@@ -106,5 +106,5 @@ Based on all issues found:
 
 ## Step 3: Save and Send
 
-- Write report to `memory/reflection-YYYY-MM-DD.md`
+- Write report to `memory/reflection/reflection-YYYY-MM-DD.md`
 - Send the full report content to the user
