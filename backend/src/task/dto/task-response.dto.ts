@@ -1,16 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class TaskMessageDto {
-  @ApiProperty({ description: '角色' })
-  role: string;
-
-  @ApiProperty({ description: '消息内容' })
-  content: string;
-
-  @ApiProperty({ description: '时间戳', required: false })
-  timestamp?: string;
-}
-
 export class TaskArtifactDto {
   @ApiProperty({ description: '文件名' })
   fileName: string;
@@ -26,13 +15,46 @@ export class ChildTaskDto {
   @ApiProperty({ description: '子任务 ID' })
   id: string;
 
-  @ApiProperty({ description: '子任务名称', required: false, nullable: true })
+  @ApiProperty({ description: '消息角色' })
+  role: string;
+
+  @ApiProperty({ description: '消息时间戳（ISO）', required: false, nullable: true })
+  timestamp: string | null;
+
+  @ApiProperty({
+    description: '消息内容（原始 content 数组）',
+    type: 'array',
+    items: { type: 'object', additionalProperties: true },
+  })
+  content: Record<string, unknown>[];
+
+  @ApiProperty({
+    description: '是否错误（来自 message.isError，缺失默认为 false）',
+  })
+  isError: boolean;
+
+  @ApiProperty({
+    description: '兼容字段：子任务名称',
+    required: false,
+    nullable: true,
+    deprecated: true,
+  })
   name: string | null;
 
-  @ApiProperty({ description: '子任务状态', required: false, nullable: true })
+  @ApiProperty({
+    description: '兼容字段：子任务状态',
+    required: false,
+    nullable: true,
+    deprecated: true,
+  })
   status: string | null;
 
-  @ApiProperty({ description: '子任务错误信息', required: false, nullable: true })
+  @ApiProperty({
+    description: '兼容字段：子任务错误信息（isError=true 时有值）',
+    required: false,
+    nullable: true,
+    deprecated: true,
+  })
   error: string | null;
 }
 
@@ -54,9 +76,6 @@ export class TaskItemDto {
 
   @ApiProperty({ type: [TaskArtifactDto], description: '任务产生的文件列表' })
   artifacts: TaskArtifactDto[];
-
-  @ApiProperty({ type: [TaskMessageDto], description: '该轮对话消息' })
-  messages: TaskMessageDto[];
 
   @ApiProperty({ type: [ChildTaskDto], description: '子任务列表' })
   childrenTasks: ChildTaskDto[];
