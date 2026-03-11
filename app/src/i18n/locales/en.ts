@@ -20,7 +20,8 @@ export default {
     clear: 'Clear',
     loading: 'Loading task history...',
     error: 'Task history unavailable',
-    empty: 'No completed tasks yet. Run skills from the workspace to see them here.',
+    empty:
+      'No completed tasks yet. Run skills from the workspace to see them here.',
     noResults: 'No tasks in this date range',
     statsError: 'Task stats unavailable',
     completedAt: 'Completed at',
@@ -36,6 +37,7 @@ export default {
     messages: 'Conversation',
     user: 'User',
     assistant: 'Assistant',
+    toolResult: 'Tool execution result',
     expand: 'Expand',
     collapse: 'Collapse',
     files: 'Files',
@@ -65,7 +67,8 @@ export default {
     listError: 'Failed to load file list',
     contentLoading: 'Loading content...',
     contentError: 'Failed to load file content',
-    previewUnsupported: 'This file type is not supported for preview. Open locally:',
+    previewUnsupported:
+      'This file type is not supported for preview. Open locally:',
     fileCount: 'files',
   },
   solutions: {
@@ -103,10 +106,12 @@ export default {
   },
   artifact: {
     dailySummary: 'AI Daily Summary',
-    dailySummaryDesc: 'Structured summary of user-AI conversations and task execution insights',
+    dailySummaryDesc:
+      'Structured summary of user-AI conversations and task execution insights',
     chatSummaryDesc: 'Structured summary of daily user-AI chats',
     taskInsightDesc: 'Insights and daily report after AI task execution',
     sessionAndTask: 'Session & task files',
-    noAttachments: 'No attachments yet. Files from conversations will appear here.',
+    noAttachments:
+      'No attachments yet. Files from conversations will appear here.',
   },
 };

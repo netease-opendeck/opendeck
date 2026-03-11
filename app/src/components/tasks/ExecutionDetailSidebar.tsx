@@ -1,6 +1,14 @@
 import { defineComponent, nextTick, onMounted, onUpdated, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { X, File, CheckCircle2, AlertCircle } from 'lucide-vue-next';
+import {
+  X,
+  File,
+  CheckCircle2,
+  AlertCircle,
+  User,
+  Sparkles,
+  Terminal,
+} from 'lucide-vue-next';
 import MarkdownView from '@/components/common/MarkdownView';
 import type { TaskHistoryItem, TaskArtifact } from '@/types';
 
@@ -109,6 +117,37 @@ export default defineComponent({
       return `${hours}h ${rest}min`;
     };
 
+    const isUserRole = (role: string) => role === 'user';
+    const isToolResultRole = (role: string) => role === 'toolResult';
+
+    const roleLabel = (role: string) => {
+      if (isUserRole(role)) return t('task.user');
+      if (isToolResultRole(role)) return t('task.toolResult');
+      return t('task.assistant');
+    };
+
+    const messageLayoutClass = (role: string) => {
+      if (isUserRole(role)) return 'justify-end';
+      return 'justify-start';
+    };
+
+    const messageBubbleClass = (role: string) => {
+      if (isUserRole(role))
+        return 'bg-blue-50 border-blue-100 text-slate-800 rounded-br-sm';
+      if (isToolResultRole(role))
+        return 'bg-slate-100 border-slate-200 text-slate-700 rounded-bl-sm';
+      return 'bg-white border-slate-200 text-slate-800 rounded-bl-sm';
+    };
+
+    const messageMetaClass = (role: string) =>
+      isUserRole(role) ? 'text-right' : 'text-left';
+
+    const messageOverlayClass = (role: string) => {
+      if (isUserRole(role)) return 'from-blue-50 to-transparent';
+      if (isToolResultRole(role)) return 'from-slate-100 to-transparent';
+      return 'from-white to-transparent';
+    };
+
     return () => {
       return (
         <div
@@ -207,58 +246,90 @@ export default defineComponent({
                     {t('task.messages')}
                   </h4>
                   <ul class="space-y-3">
-                    {props.task.messages.map((msg, idx) => (
-                      <li key={idx} class="text-xs">
-                        <p class="font-medium text-slate-600 mb-0.5">
-                          {msg.role === 'user'
-                            ? t('task.user')
-                            : t('task.assistant')}
-                          ：
-                        </p>
-                        <div class="relative">
+                    {props.task.messages.map((msg, idx) => {
+                      const layoutClass = messageLayoutClass(msg.role);
+                      const bubbleClass = messageBubbleClass(msg.role);
+                      const metaClass = messageMetaClass(msg.role);
+                      const overlayClass = messageOverlayClass(msg.role);
+
+                      return (
+                        <li key={idx} class={`text-xs flex ${layoutClass}`}>
                           <div
-                            ref={(el) => {
-                              messageBodyRefs.value[idx] =
-                                (el as HTMLElement | null) ?? null;
-                            }}
-                            class={`text-slate-700 ${
-                              messageOverflowMap.value[idx] &&
-                              !messageExpandedMap.value[idx]
-                                ? 'max-h-[80px] overflow-hidden'
-                                : ''
+                            class={`w-full ${
+                              isToolResultRole(msg.role) ? '' : 'max-w-[86%]'
                             }`}
                           >
-                            <MarkdownView source={msg.content} />
+                            <div
+                              class={`rounded-lg border px-3 py-2 ${bubbleClass}`}
+                            >
+                              <div class="mb-1 flex items-center gap-1.5 text-slate-500">
+                                <span
+                                  class="relative inline-flex h-4 w-4 items-center justify-center group"
+                                  aria-label={roleLabel(msg.role)}
+                                >
+                                  {isUserRole(msg.role) ? (
+                                    <User size={13} />
+                                  ) : isToolResultRole(msg.role) ? (
+                                    <Terminal size={13} />
+                                  ) : (
+                                    <Sparkles size={13} />
+                                  )}
+                                  <span class="pointer-events-none absolute -top-7 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded bg-slate-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 shadow transition-opacity group-hover:opacity-100">
+                                    {roleLabel(msg.role)}
+                                  </span>
+                                </span>
+                              </div>
+                              <div class="relative">
+                                <div
+                                  ref={(el) => {
+                                    messageBodyRefs.value[idx] =
+                                      (el as HTMLElement | null) ?? null;
+                                  }}
+                                  class={`${
+                                    messageOverflowMap.value[idx] &&
+                                    !messageExpandedMap.value[idx]
+                                      ? 'max-h-[80px] overflow-hidden'
+                                      : ''
+                                  }`}
+                                >
+                                  <MarkdownView source={msg.content} />
+                                </div>
+                                {messageOverflowMap.value[idx] &&
+                                  !messageExpandedMap.value[idx] && (
+                                    <div
+                                      class={`pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t ${overlayClass}`}
+                                    />
+                                  )}
+                              </div>
+                            </div>
+                            {messageOverflowMap.value[idx] && (
+                              <button
+                                type="button"
+                                class={`mt-1 text-[11px] font-medium text-blue-600 hover:text-blue-700 ${metaClass}`}
+                                onClick={() => toggleMessageExpanded(idx)}
+                              >
+                                {messageExpandedMap.value[idx]
+                                  ? t('task.collapse')
+                                  : t('task.expand')}
+                              </button>
+                            )}
+                            {msg.timestamp && (
+                              <p
+                                class={`text-[10px] text-slate-400 mt-1 ${metaClass}`}
+                              >
+                                {new Date(msg.timestamp).toLocaleString(
+                                  dateLocale(),
+                                  {
+                                    dateStyle: 'short',
+                                    timeStyle: 'short',
+                                  },
+                                )}
+                              </p>
+                            )}
                           </div>
-                          {messageOverflowMap.value[idx] &&
-                            !messageExpandedMap.value[idx] && (
-                              <div class="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-slate-50 to-transparent" />
-                            )}
-                        </div>
-                        {messageOverflowMap.value[idx] && (
-                          <button
-                            type="button"
-                            class="mt-1 text-[11px] font-medium text-blue-600 hover:text-blue-700"
-                            onClick={() => toggleMessageExpanded(idx)}
-                          >
-                            {messageExpandedMap.value[idx]
-                              ? t('task.collapse')
-                              : t('task.expand')}
-                          </button>
-                        )}
-                        {msg.timestamp && (
-                          <p class="text-[10px] text-slate-400 mt-1">
-                            {new Date(msg.timestamp).toLocaleString(
-                              dateLocale(),
-                              {
-                                dateStyle: 'short',
-                                timeStyle: 'short',
-                              },
-                            )}
-                          </p>
-                        )}
-                      </li>
-                    ))}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               </section>

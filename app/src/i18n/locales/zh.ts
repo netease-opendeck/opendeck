@@ -36,6 +36,7 @@ export default {
     messages: '对话',
     user: '用户',
     assistant: '助手',
+    toolResult: '工具执行结果',
     expand: '展开',
     collapse: '收起',
     files: '文件',
@@ -103,7 +104,8 @@ export default {
   },
   artifact: {
     dailySummary: 'AI 每日总结',
-    dailySummaryDesc: '用户与 AI 的对话结构化总结、任务执行洞察日报，由系统自动生成',
+    dailySummaryDesc:
+      '用户与 AI 的对话结构化总结、任务执行洞察日报，由系统自动生成',
     chatSummaryDesc: '用户与 AI 每日聊天的结构化总结',
     taskInsightDesc: 'AI 执行任务后的洞察与日报',
     sessionAndTask: '会话与任务文件',
